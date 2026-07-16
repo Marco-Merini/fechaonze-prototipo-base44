@@ -4,14 +4,11 @@ import { Plus, MapPin, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 
-const sportTypes = ["Futebol Society", "Futsal", "Vôlei", "Beach Tennis", "Tênis", "Basquete", "Padel", "Outro"];
-
 const emptyForm = {
-  name: "", sport_type: "", city: "", address: "", price_per_hour: "", whatsapp_number: "", description: "", photo_url: "",
+  name: "", sport_type: "Futebol Society", city: "", address: "", price_per_hour: "", whatsapp_number: "", description: "", photo_url: "",
 };
 
 export default function Courts() {
@@ -161,15 +158,6 @@ export default function Courts() {
             <div>
               <Label>Nome da Quadra *</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="rounded-xl mt-1" />
-            </div>
-            <div>
-              <Label>Tipo de Esporte *</Label>
-              <Select value={form.sport_type} onValueChange={(v) => setForm({ ...form, sport_type: v })} required>
-                <SelectTrigger className="rounded-xl mt-1"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>
-                  {sportTypes.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

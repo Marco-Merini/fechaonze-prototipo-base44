@@ -8,17 +8,8 @@
     },
     "sport_type": {
       "type": "string",
-      "enum": [
-        "Futebol Society",
-        "Futsal",
-        "V\u00f4lei",
-        "Beach Tennis",
-        "T\u00eanis",
-        "Basquete",
-        "Padel",
-        "Outro"
-      ],
-      "description": "Tipo de esporte"
+      "default": "Futebol Society",
+      "description": "Tipo de esporte (futebol)"
     },
     "city": {
       "type": "string",
@@ -52,7 +43,6 @@
   },
   "required": [
     "name",
-    "sport_type",
     "city",
     "address",
     "price_per_hour",
