@@ -1,0 +1,63 @@
+{
+  "name": "Booking",
+  "type": "object",
+  "properties": {
+    "court_id": {
+      "type": "string",
+      "description": "ID da quadra"
+    },
+    "time_slot_id": {
+      "type": "string",
+      "description": "ID do hor\u00e1rio"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "client_phone": {
+      "type": "string",
+      "description": "Telefone do cliente"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Email do cliente"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do agendamento"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Hor\u00e1rio de in\u00edcio"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Hor\u00e1rio de t\u00e9rmino"
+    },
+    "court_name": {
+      "type": "string",
+      "description": "Nome da quadra"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "confirmado",
+        "cancelado"
+      ],
+      "default": "pendente",
+      "description": "Status do agendamento"
+    }
+  },
+  "required": [
+    "court_id",
+    "time_slot_id",
+    "client_name",
+    "client_phone",
+    "date",
+    "start_time",
+    "end_time",
+    "court_name"
+  ]
+}
