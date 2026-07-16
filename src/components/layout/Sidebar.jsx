@@ -51,8 +51,20 @@ export default function Sidebar({ userRole }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full w-64 bg-[hsl(var(--sidebar-background))] text-white border-r border-[hsl(var(--sidebar-border))] z-40 flex flex-col transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="pitch-pattern p-6 border-b border-[hsl(var(--sidebar-border))]">
+      <aside className={`fixed top-0 left-0 h-full w-64 bg-[hsl(var(--sidebar-background))] text-white border-r border-[hsl(var(--sidebar-border))] z-40 flex flex-col transition-transform duration-300 lg:translate-x-0 overflow-hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.06]"
+          style={{
+            backgroundColor: "#86efac",
+            WebkitMaskImage: "url(https://media.base44.com/images/public/6a58de6b489bfc4d5fc5352c/e2d7630bb_image.png)",
+            WebkitMaskSize: "420px 420px",
+            WebkitMaskRepeat: "repeat",
+            maskImage: "url(https://media.base44.com/images/public/6a58de6b489bfc4d5fc5352c/e2d7630bb_image.png)",
+            maskSize: "420px 420px",
+            maskRepeat: "repeat",
+          }}
+        />
+        <div className="pitch-pattern p-6 border-b border-[hsl(var(--sidebar-border))] relative z-10">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 bg-[hsl(var(--sidebar-primary))] rounded-xl flex items-center justify-center shadow-lg">
               <Goal className="w-6 h-6 text-[hsl(var(--sidebar-primary-foreground))]" />
@@ -66,7 +78,7 @@ export default function Sidebar({ userRole }) {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto relative z-10">
           <p className="px-4 mb-2 text-[10px] uppercase tracking-widest text-white/40 font-bold">Menu</p>
           {links.map((link) => {
             const Icon = link.icon;
@@ -89,7 +101,7 @@ export default function Sidebar({ userRole }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-1">
+        <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-1 relative z-10">
           <ThemeToggle />
           <button
             onClick={handleLogout}
