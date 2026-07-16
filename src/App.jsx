@@ -31,6 +31,14 @@ const RoleRouter = () => {
     const load = async () => {
       try {
         const me = await base44.auth.me();
+        const pendingType = localStorage.getItem("pending_account_type");
+        if (pendingType && !me.account_type) {
+          try {
+            await base44.auth.updateMe({ account_type: pendingType });
+            me.account_type = pendingType;
+          } catch (e) { console.error(e); }
+          localStorage.removeItem("pending_account_type");
+        }
         setUser(me);
       } catch (e) {
         console.error(e);
@@ -48,12 +56,12 @@ const RoleRouter = () => {
     );
   }
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.account_type === "dono";
 
   if (isAdmin) {
     return (
       <Routes>
-        <Route element={<AppLayout userRole="admin" />}>
+        <Route element={<AppLayout userRole="dono" />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/courts" element={<Courts />} />
           <Route path="/time-slots" element={<TimeSlots />} />
@@ -66,7 +74,7 @@ const RoleRouter = () => {
 
   return (
     <Routes>
-      <Route element={<AppLayout userRole="user" />}>
+      <Route element={<AppLayout userRole="cliente" />}>
         <Route path="/" element={<Navigate to="/explore" replace />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/court/:id" element={<CourtDetail />} />

@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, Goal, User } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -18,6 +18,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [accountType, setAccountType] = useState("cliente");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +29,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
+      localStorage.setItem("pending_account_type", accountType);
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {
@@ -67,6 +69,7 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
+    localStorage.setItem("pending_account_type", accountType);
     base44.auth.loginWithProvider("google", "/");
   };
 
@@ -161,6 +164,38 @@ export default function Register() {
           {error}
         </div>
       )}
+
+      <div className="space-y-2 mb-4">
+        <Label>Tipo de conta</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setAccountType("dono")}
+            className={`flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 transition-all ${
+              accountType === "dono"
+                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                : "border-border hover:bg-muted"
+            }`}
+          >
+            <Goal className={`w-6 h-6 ${accountType === "dono" ? "text-primary" : "text-muted-foreground"}`} />
+            <span className="text-sm font-semibold">Dono de Quadra</span>
+            <span className="text-[11px] text-muted-foreground text-center leading-tight">Cadastro e gestão</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAccountType("cliente")}
+            className={`flex flex-col items-center gap-1.5 p-4 rounded-xl border-2 transition-all ${
+              accountType === "cliente"
+                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                : "border-border hover:bg-muted"
+            }`}
+          >
+            <User className={`w-6 h-6 ${accountType === "cliente" ? "text-primary" : "text-muted-foreground"}`} />
+            <span className="text-sm font-semibold">Cliente</span>
+            <span className="text-[11px] text-muted-foreground text-center leading-tight">Reservar horários</span>
+          </button>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

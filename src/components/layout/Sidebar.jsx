@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, User, LogOut, Menu, X, Goal } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const adminLinks = [
   { label: "Painel", path: "/", icon: LayoutDashboard },
@@ -20,7 +21,7 @@ const clientLinks = [
 export default function Sidebar({ userRole }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const links = userRole === "admin" ? adminLinks : clientLinks;
+  const links = userRole === "dono" ? adminLinks : clientLinks;
 
   const handleLogout = () => {
     base44.auth.logout("/login");
@@ -59,7 +60,7 @@ export default function Sidebar({ userRole }) {
             <div>
               <h1 className="font-heading font-extrabold text-xl tracking-tight leading-none">QuadraFácil</h1>
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-bold mt-1">
-                {userRole === "admin" ? "Gestão Pro" : "Aluguel de Quadras"}
+                {userRole === "dono" ? "Gestão Pro" : "Aluguel de Quadras"}
               </p>
             </div>
           </div>
@@ -88,7 +89,8 @@ export default function Sidebar({ userRole }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-[hsl(var(--sidebar-border))]">
+        <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-1">
+          <ThemeToggle />
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/70 hover:bg-destructive/20 hover:text-white transition-all duration-200 w-full"

@@ -1,17 +1,15 @@
 {
-  "properties": {
-    "role": {
-      "type": "string",
-      "description": "The role of the user in the app",
-      "enum": [
-        "admin",
-        "user"
-      ]
-    }
-  },
-  "required": [
-    "role"
-  ],
   "name": "User",
-  "type": "object"
+  "type": "object",
+  "properties": {
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "dono",
+        "cliente"
+      ],
+      "default": "cliente",
+      "description": "Tipo de conta: dono de quadra ou cliente"
+    }
+  }
 }
