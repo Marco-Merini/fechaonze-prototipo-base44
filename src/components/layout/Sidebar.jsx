@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, User, LogOut, Menu, X, Users } from "lucide-react";
+import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, User, LogOut, Menu, X, Users, Star } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -15,6 +15,7 @@ const adminLinks = [
 
 const clientLinks = [
   { label: "Falta Um", path: "/matches", icon: Users },
+  { label: "Jogadores", path: "/players", icon: Star },
   { label: "Buscar Quadras", path: "/explore", icon: Search },
   { label: "Meus Agendamentos", path: "/my-bookings", icon: CalendarCheck },
   { label: "Meu Perfil", path: "/profile", icon: User },

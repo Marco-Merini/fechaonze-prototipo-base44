@@ -1,0 +1,41 @@
+{
+  "name": "PlayerRating",
+  "type": "object",
+  "properties": {
+    "player_id": {
+      "type": "string",
+      "description": "ID do jogador avaliado"
+    },
+    "player_name": {
+      "type": "string",
+      "description": "Nome do jogador avaliado"
+    },
+    "rater_id": {
+      "type": "string",
+      "description": "ID de quem avaliou"
+    },
+    "rater_name": {
+      "type": "string",
+      "description": "Nome de quem avaliou"
+    },
+    "match_id": {
+      "type": "string",
+      "description": "ID da partida (opcional)"
+    },
+    "overall_rating": {
+      "type": "number",
+      "description": "Nota geral (1-10)"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Coment\u00e1rio"
+    }
+  },
+  "required": [
+    "player_id",
+    "player_name",
+    "rater_id",
+    "rater_name",
+    "overall_rating"
+  ]
+}
