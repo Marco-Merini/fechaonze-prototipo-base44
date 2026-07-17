@@ -35,13 +35,13 @@ export default function Login() {
   return (
     <AuthLayout
       icon={LogIn}
-      title="Welcome back"
-      subtitle="Log in to your account"
+      title="Bem-vindo de volta"
+      subtitle="Acesse sua conta"
       footer={
         <>
-          Don't have an account?{" "}
+          Não tem conta?{" "}
           <Link to="/register" className="text-primary font-medium hover:underline">
-            Create one
+            Criar conta
           </Link>
         </>
       }

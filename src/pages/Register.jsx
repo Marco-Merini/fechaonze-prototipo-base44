@@ -178,8 +178,8 @@ export default function Register() {
             }`}
           >
             <Goal className={`w-6 h-6 ${accountType === "dono" ? "text-primary" : "text-muted-foreground"}`} />
-            <span className="text-sm font-semibold">Dono de Quadra</span>
-            <span className="text-[11px] text-muted-foreground text-center leading-tight">Cadastro e gestão</span>
+            <span className="text-sm font-semibold">Dono do Local</span>
+            <span className="text-[11px] text-muted-foreground text-center leading-tight">Cadastre seu complexo</span>
           </button>
           <button
             type="button"
@@ -191,8 +191,8 @@ export default function Register() {
             }`}
           >
             <User className={`w-6 h-6 ${accountType === "cliente" ? "text-primary" : "text-muted-foreground"}`} />
-            <span className="text-sm font-semibold">Cliente</span>
-            <span className="text-[11px] text-muted-foreground text-center leading-tight">Reservar horários</span>
+            <span className="text-sm font-semibold">Jogador</span>
+            <span className="text-[11px] text-muted-foreground text-center leading-tight">Reserve e jogue</span>
           </button>
         </div>
       </div>
