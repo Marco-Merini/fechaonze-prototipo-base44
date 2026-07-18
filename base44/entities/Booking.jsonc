@@ -29,11 +29,11 @@
     },
     "start_time": {
       "type": "string",
-      "description": "Hor\u00e1rio de in\u00edcio"
+      "description": "Horario de inicio"
     },
     "end_time": {
       "type": "string",
-      "description": "Hor\u00e1rio de t\u00e9rmino"
+      "description": "Horario de termino"
     },
     "court_name": {
       "type": "string",
@@ -48,6 +48,11 @@
       ],
       "default": "pendente",
       "description": "Status do agendamento"
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o lembrete por email ja foi enviado"
     }
   },
   "required": [
