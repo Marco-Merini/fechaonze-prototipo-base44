@@ -70,7 +70,7 @@ export default function Dashboard() {
             <span className="text-white/80 text-xs font-medium uppercase tracking-widest">Painel do Gestor</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-heading font-extrabold text-shadow-strong">Sua operação esportiva em um só lugar</h1>
-          <p className="text-white/90 mt-1 text-sm sm:text-base text-shadow-strong">Gerencie quadras, horários e agendamentos no Falta Um.</p>
+          <p className="text-white/90 mt-1 text-sm sm:text-base text-shadow-strong">Gerencie quadras, horários e agendamentos no FechaOnze.</p>
         </div>
       </div>
 

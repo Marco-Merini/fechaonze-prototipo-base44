@@ -14,7 +14,7 @@ const adminLinks = [
 ];
 
 const clientLinks = [
-  { label: "Falta Um", path: "/matches", icon: Users },
+  { label: "Fecha Onze", path: "/matches", icon: Users },
   { label: "Jogadores", path: "/players", icon: Star },
   { label: "Buscar Quadras", path: "/explore", icon: Search },
   { label: "Meus Agendamentos", path: "/my-bookings", icon: CalendarCheck },
@@ -37,7 +37,7 @@ export default function Sidebar({ userRole }) {
         <div className="flex items-center gap-2">
           <Logo size={36} />
           <div className="leading-tight">
-            <span className="font-heading font-extrabold text-base tracking-tight">Falta Um</span>
+            <span className="font-heading font-extrabold text-base tracking-tight">FechaOnze</span>
             <span className="block text-[10px] uppercase tracking-widest text-white/60 font-bold">{userRole === "dono" ? "Gestão" : "Jogador"}</span>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function Sidebar({ userRole }) {
           <div className="flex items-center gap-3">
             <Logo size={44} />
             <div>
-              <h1 className="font-heading font-extrabold text-xl tracking-tight leading-none">Falta Um</h1>
+              <h1 className="font-heading font-extrabold text-xl tracking-tight leading-none">FechaOnze</h1>
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 font-bold mt-1">
                 {userRole === "dono" ? "Gestão do Local" : "Encontre sua partida"}
               </p>
