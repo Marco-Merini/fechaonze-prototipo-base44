@@ -8,7 +8,7 @@
     },
     "time_slot_id": {
       "type": "string",
-      "description": "ID do hor\u00e1rio"
+      "description": "ID do horario"
     },
     "client_name": {
       "type": "string",
@@ -53,6 +53,10 @@
       "type": "boolean",
       "default": false,
       "description": "Se o lembrete por email ja foi enviado"
+    },
+    "calendar_event_id": {
+      "type": "string",
+      "description": "ID do evento criado no Google Calendar"
     }
   },
   "required": [

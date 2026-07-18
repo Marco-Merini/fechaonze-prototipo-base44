@@ -35,6 +35,14 @@
       "type": "string",
       "description": "Descri\u00e7\u00e3o adicional"
     },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude da quadra"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude da quadra"
+    },
     "is_active": {
       "type": "boolean",
       "default": true,

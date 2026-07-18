@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/use-toast";
 
 const emptyForm = {
-  name: "", sport_type: "Futebol Society", city: "", address: "", price_per_hour: "", whatsapp_number: "", description: "", photo_url: "",
+  name: "", sport_type: "Futebol Society", city: "", address: "", price_per_hour: "", whatsapp_number: "", description: "", photo_url: "", latitude: "", longitude: "",
 };
 
 export default function Courts() {
@@ -37,6 +37,7 @@ export default function Courts() {
       name: court.name, sport_type: court.sport_type, city: court.city, address: court.address,
       price_per_hour: String(court.price_per_hour), whatsapp_number: court.whatsapp_number,
       description: court.description || "", photo_url: court.photo_url || "",
+      latitude: court.latitude != null ? String(court.latitude) : "", longitude: court.longitude != null ? String(court.longitude) : "",
     });
     setEditingId(court.id);
     setDialogOpen(true);
@@ -46,7 +47,13 @@ export default function Courts() {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { ...form, price_per_hour: Number(form.price_per_hour), is_active: true };
+      const payload = {
+        ...form,
+        price_per_hour: Number(form.price_per_hour),
+        latitude: form.latitude ? Number(form.latitude) : null,
+        longitude: form.longitude ? Number(form.longitude) : null,
+        is_active: true,
+      };
       if (editingId) {
         await base44.entities.Court.update(editingId, payload);
         toast({ title: "Quadra atualizada!" });
@@ -82,6 +89,15 @@ export default function Courts() {
     } catch (err) {
       toast({ title: "Erro ao fazer upload", variant: "destructive" });
     }
+  };
+
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) { toast({ title: "Geolocalização não suportada", variant: "destructive" }); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setForm((prev) => ({ ...prev, latitude: String(pos.coords.latitude), longitude: String(pos.coords.longitude) })),
+      () => toast({ title: "Não foi possível obter sua localização", variant: "destructive" }),
+      { enableHighAccuracy: true }
+    );
   };
 
   if (loading) {
@@ -172,6 +188,17 @@ export default function Courts() {
             <div>
               <Label>Endereço *</Label>
               <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required className="rounded-xl mt-1" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <Label>Localização (lat / lng)</Label>
+                <button type="button" onClick={handleUseLocation} className="text-xs text-primary font-medium hover:underline">Usar minha localização</button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-1">
+                <Input value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} placeholder="Latitude" className="rounded-xl" />
+                <Input value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} placeholder="Longitude" className="rounded-xl" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Necessário para o filtro por raio na busca.</p>
             </div>
             <div>
               <Label>WhatsApp *</Label>
