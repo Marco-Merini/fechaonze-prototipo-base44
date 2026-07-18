@@ -65,7 +65,7 @@ export default function Players() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
           <h3 className="font-heading font-semibold text-lg mb-1">Nenhum jogador encontrado</h3>
           <p className="text-muted-foreground">Tente outra busca</p>

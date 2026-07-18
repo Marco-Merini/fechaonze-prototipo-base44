@@ -75,7 +75,7 @@ export default function Bookings() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <CalendarCheck className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
           <h3 className="font-heading font-semibold text-lg mb-1">Nenhum agendamento</h3>
           <p className="text-muted-foreground">Os agendamentos dos clientes aparecerão aqui</p>
@@ -83,15 +83,15 @@ export default function Bookings() {
       ) : (
         <div className="space-y-3">
           {filtered.map((b) => (
-            <div key={b.id} className="bg-white rounded-2xl border border-border p-5 sm:p-6">
+            <div key={b.id} className="bg-card rounded-2xl border border-border p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="font-heading font-semibold text-lg">{b.client_name}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      b.status === "confirmado" ? "bg-emerald-100 text-emerald-700" :
-                      b.status === "cancelado" ? "bg-red-100 text-red-700" :
-                      "bg-amber-100 text-amber-700"
+                      b.status === "confirmado" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" :
+                      b.status === "cancelado" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" :
+                      "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
                     }`}>
                       {b.status}
                     </span>
@@ -102,7 +102,7 @@ export default function Bookings() {
                   <p className="text-sm text-muted-foreground mt-1">📱 {b.client_phone}{b.client_email ? ` • ✉️ ${b.client_email}` : ""}</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <Button variant="outline" size="sm" className="rounded-xl gap-1.5 text-green-600 border-green-200 hover:bg-green-50" onClick={() => openWhatsApp(b)}>
+                  <Button variant="outline" size="sm" className="rounded-xl gap-1.5 text-green-600 border-green-200 hover:bg-green-50 dark:border-green-500/30 dark:text-green-400 dark:hover:bg-green-500/10" onClick={() => openWhatsApp(b)}>
                     <MessageCircle className="w-4 h-4" /> WhatsApp
                   </Button>
                   {b.status === "pendente" && (

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 function StatCard({ icon: Icon, label, value, color, to }) {
   return (
-    <Link to={to} className="bg-white rounded-2xl border border-border p-5 sm:p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
+    <Link to={to} className="bg-card rounded-2xl border border-border p-5 sm:p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold">{label}</p>
@@ -83,7 +83,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent bookings */}
-      <div className="bg-white rounded-2xl border border-border shadow-sm">
+      <div className="bg-card rounded-2xl border border-border shadow-sm">
         <div className="p-5 sm:p-6 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -114,9 +114,9 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
-                  b.status === "confirmado" ? "bg-emerald-100 text-emerald-700" :
-                  b.status === "cancelado" ? "bg-red-100 text-red-700" :
-                  "bg-amber-100 text-amber-700"
+                  b.status === "confirmado" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" :
+                  b.status === "cancelado" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" :
+                  "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
                 }`}>
                   {b.status}
                 </span>

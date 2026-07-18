@@ -3,9 +3,9 @@ import { Users, MapPin, Calendar, Clock, MessageCircle, Sparkles, Trophy, Flame 
 import { Button } from "@/components/ui/button";
 
 const levelConfig = {
-  amistoso: { label: "Amistoso/Resenha", icon: Sparkles, color: "bg-emerald-100 text-emerald-700" },
-  competitivo: { label: "Competitivo", icon: Trophy, color: "bg-orange-100 text-orange-700" },
-  iniciantes: { label: "Iniciantes", icon: Flame, color: "bg-blue-100 text-blue-700" },
+  amistoso: { label: "Amistoso/Resenha", icon: Sparkles, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" },
+  competitivo: { label: "Competitivo", icon: Trophy, color: "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300" },
+  iniciantes: { label: "Iniciantes", icon: Flame, color: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300" },
 };
 
 export default function MatchCard({ post, user, onToggleInterest, onContact }) {
@@ -15,7 +15,7 @@ export default function MatchCard({ post, user, onToggleInterest, onContact }) {
   const interestedCount = (post.interested_players || []).length;
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 sm:p-6">
+    <div className="bg-card rounded-2xl border border-border p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -26,7 +26,7 @@ export default function MatchCard({ post, user, onToggleInterest, onContact }) {
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">por {post.organizer_name}</p>
         </div>
-        <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${post.status === "completo" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+        <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${post.status === "completo" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"}`}>
           {post.status === "completo" ? "Completo" : "Aberto"}
         </span>
       </div>

@@ -121,7 +121,7 @@ export default function Courts() {
       </div>
 
       {courts.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
           <h3 className="font-heading font-semibold text-lg mb-1">Nenhuma quadra cadastrada</h3>
           <p className="text-muted-foreground mb-4">Comece adicionando sua primeira quadra</p>
@@ -130,7 +130,7 @@ export default function Courts() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {courts.map((court) => (
-            <div key={court.id} className="bg-white rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all">
+            <div key={court.id} className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all">
               <div className="h-40 bg-gradient-to-br from-primary/10 to-primary/5 relative overflow-hidden">
                 {court.photo_url ? (
                   <img src={court.photo_url} alt={court.name} className="w-full h-full object-cover" />
@@ -139,7 +139,7 @@ export default function Courts() {
                     <MapPin className="w-12 h-12 text-primary/20" />
                   </div>
                 )}
-                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-medium text-primary">
+                <span className="absolute top-3 left-3 bg-card/90 backdrop-blur px-3 py-1 rounded-full text-xs font-medium text-primary">
                   {court.sport_type}
                 </span>
               </div>

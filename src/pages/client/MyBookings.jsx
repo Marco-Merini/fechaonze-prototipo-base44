@@ -33,7 +33,7 @@ export default function MyBookings() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <CalendarCheck className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
           <h3 className="font-heading font-semibold text-lg mb-1">Nenhum agendamento</h3>
           <p className="text-muted-foreground">Seus agendamentos aparecerão aqui</p>
@@ -41,7 +41,7 @@ export default function MyBookings() {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <div key={b.id} className="bg-white rounded-2xl border border-border p-5 sm:p-6">
+            <div key={b.id} className="bg-card rounded-2xl border border-border p-5 sm:p-6">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-heading font-semibold text-lg">{b.court_name}</h3>
@@ -50,9 +50,9 @@ export default function MyBookings() {
                   </p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
-                  b.status === "confirmado" ? "bg-emerald-100 text-emerald-700" :
-                  b.status === "cancelado" ? "bg-red-100 text-red-700" :
-                  "bg-amber-100 text-amber-700"
+                  b.status === "confirmado" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" :
+                  b.status === "cancelado" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" :
+                  "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
                 }`}>
                   {b.status}
                 </span>

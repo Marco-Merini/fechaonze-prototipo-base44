@@ -109,13 +109,13 @@ export default function Explore() {
       </div>
 
       {userLoc && filtered.length === 0 && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-sm">
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-200 rounded-xl p-4 text-sm">
           Nenhuma quadra com coordenadas dentro do raio. Peça ao dono da quadra para definir a localização no cadastro.
         </div>
       )}
 
       {!userLoc && filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
           <h3 className="font-heading font-semibold text-lg mb-1">Nenhuma quadra encontrada</h3>
           <p className="text-muted-foreground">Tente buscar por outra cidade</p>
@@ -126,7 +126,7 @@ export default function Explore() {
             <Link
               key={court.id}
               to={`/court/${court.id}`}
-              className="bg-white rounded-2xl border border-border overflow-hidden group hover:shadow-lg transition-all duration-300"
+              className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-lg transition-all duration-300"
             >
               <div className="h-44 bg-gradient-to-br from-primary/10 to-primary/5 relative overflow-hidden">
                 {court.photo_url ? (
@@ -136,7 +136,7 @@ export default function Explore() {
                     <MapPin className="w-14 h-14 text-primary/15" />
                   </div>
                 )}
-                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-medium text-primary">
+                <span className="absolute top-3 left-3 bg-card/90 backdrop-blur px-3 py-1 rounded-full text-xs font-medium text-primary">
                   {court.sport_type}
                 </span>
                 {court._dist != null && (

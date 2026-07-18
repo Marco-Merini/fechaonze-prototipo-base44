@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, Settings, LogOut, Menu, X, Users, Star } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import ThemeToggle from "@/components/ThemeToggle";
+// ThemeToggle movido para a página de Configurações
 import Logo from "@/components/Logo";
 
 const adminLinks = [
@@ -18,7 +18,6 @@ const clientLinks = [
   { label: "Meus Agendamentos", path: "/my-bookings", icon: CalendarCheck },
   { label: "Meu time", path: "/players", icon: Star },
   { label: "Fecha Onze", path: "/matches", icon: Users },
-  { label: "Configurações", path: "/profile", icon: Settings },
 ];
 
 export default function Sidebar({ userRole }) {
@@ -101,7 +100,18 @@ export default function Sidebar({ userRole }) {
         </nav>
 
         <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-1 relative z-10">
-          <ThemeToggle />
+          <Link
+            to="/profile"
+            onClick={() => setMobileOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              location.pathname === "/profile"
+                ? "bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))] shadow-md"
+                : "text-white/70 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Settings className="w-5 h-5" />
+            Configurações
+          </Link>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/70 hover:bg-destructive/20 hover:text-white transition-all duration-200 w-full"

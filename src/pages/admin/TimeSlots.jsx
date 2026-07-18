@@ -83,7 +83,7 @@ export default function TimeSlots() {
       </div>
 
       {courts.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-border p-12 text-center">
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
           <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
           <h3 className="font-heading font-semibold text-lg mb-1">Cadastre uma quadra primeiro</h3>
           <p className="text-muted-foreground">Você precisa ter quadras para adicionar horários</p>
@@ -96,7 +96,7 @@ export default function TimeSlots() {
                 key={c.id}
                 onClick={() => setSelectedCourt(c.id)}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  selectedCourt === c.id ? "bg-primary text-white shadow-sm" : "bg-white border border-border text-muted-foreground hover:bg-muted"
+                  selectedCourt === c.id ? "bg-primary text-white shadow-sm" : "bg-card border border-border text-muted-foreground hover:bg-muted"
                 }`}
               >
                 {c.name}
@@ -105,12 +105,12 @@ export default function TimeSlots() {
           </div>
 
           {filteredSlots.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-border p-12 text-center">
+            <div className="bg-card rounded-2xl border border-border p-12 text-center">
               <Clock className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
               <p className="text-muted-foreground">Nenhum horário para <strong>{courtName(selectedCourt)}</strong></p>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-border divide-y divide-border">
+            <div className="bg-card rounded-2xl border border-border divide-y divide-border">
               {filteredSlots.map((slot) => (
                 <div key={slot.id} className="p-4 sm:p-5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -123,7 +123,7 @@ export default function TimeSlots() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${slot.is_available ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${slot.is_available ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"}`}>
                       {slot.is_available ? "Disponível" : "Ocupado"}
                     </span>
                     <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleDelete(slot.id)}>

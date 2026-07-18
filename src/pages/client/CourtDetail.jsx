@@ -97,7 +97,7 @@ export default function CourtDetail() {
         <ArrowLeft className="w-4 h-4" /> Voltar para busca
       </button>
 
-      <div className="bg-white rounded-2xl border border-border overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <div className="h-48 sm:h-64 bg-gradient-to-br from-primary/10 to-primary/5 relative">
           {court.photo_url ? (
             <img src={court.photo_url} alt={court.name} className="w-full h-full object-cover" />
@@ -106,7 +106,7 @@ export default function CourtDetail() {
               <MapPin className="w-20 h-20 text-primary/15" />
             </div>
           )}
-          <span className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium text-primary">
+          <span className="absolute top-4 left-4 bg-card/90 backdrop-blur px-4 py-1.5 rounded-full text-sm font-medium text-primary">
             {court.sport_type}
           </span>
         </div>
@@ -128,7 +128,7 @@ export default function CourtDetail() {
         </h2>
 
         {Object.keys(slotsByDate).length === 0 ? (
-          <div className="bg-white rounded-2xl border border-border p-12 text-center">
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
             <CalendarCheck className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
             <p className="text-muted-foreground">Nenhum horário disponível no momento</p>
             <Button variant="outline" className="mt-4 rounded-xl" onClick={() => navigate("/explore")}>
@@ -138,7 +138,7 @@ export default function CourtDetail() {
         ) : (
           <div className="space-y-4">
             {Object.entries(slotsByDate).map(([date, dateSlots]) => (
-              <div key={date} className="bg-white rounded-2xl border border-border">
+              <div key={date} className="bg-card rounded-2xl border border-border">
                 <div className="px-5 py-3 border-b border-border bg-muted/50 rounded-t-2xl">
                   <p className="font-medium text-sm">{new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</p>
                 </div>

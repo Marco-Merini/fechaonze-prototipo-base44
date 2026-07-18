@@ -68,11 +68,11 @@ export default function PlayerDetail() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="bg-white rounded-xl border border-border p-3">
+            <div className="bg-card rounded-xl border border-border p-3">
               <p className="text-xs text-muted-foreground uppercase font-bold">Partidas</p>
               <p className="text-xl font-bold flex items-center gap-1.5"><Gamepad2 className="w-4 h-4 text-primary" /> {player.games_played || 0}</p>
             </div>
-            <div className="bg-white rounded-xl border border-border p-3">
+            <div className="bg-card rounded-xl border border-border p-3">
               <p className="text-xs text-muted-foreground uppercase font-bold">Nota média</p>
               <p className="text-xl font-bold flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-500" /> {avg || "—"}</p>
             </div>
@@ -83,7 +83,7 @@ export default function PlayerDetail() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-border p-5">
+      <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-heading font-bold mb-3">Atributos</h3>
         <div className="space-y-2">
           {ATTR_LABELS.map((a) => {
@@ -101,7 +101,7 @@ export default function PlayerDetail() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-border p-5">
+      <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="font-heading font-bold mb-3">Avaliações ({ratings.length})</h3>
         {ratings.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-6">Ainda sem avaliações. Seja o primeiro!</p>
@@ -109,7 +109,7 @@ export default function PlayerDetail() {
           <div className="space-y-3">
             {ratings.map((r) => (
               <div key={r.id} className="flex items-start gap-3 pb-3 border-b border-border last:border-0 last:pb-0">
-                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
                   <Star className="w-4 h-4 text-amber-600" />
                 </div>
                 <div className="flex-1">
