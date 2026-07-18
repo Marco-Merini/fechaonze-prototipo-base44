@@ -69,6 +69,7 @@ const RoleRouter = () => {
           <Route path="/courts" element={<Courts />} />
           <Route path="/time-slots" element={<TimeSlots />} />
           <Route path="/bookings" element={<Bookings />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -58,12 +58,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       {/* Hero */}
       <div className="relative rounded-3xl overflow-hidden h-44 sm:h-56 shadow-xl">
-        <img
-          src="https://images.unsplash.com/photo-1556056504-5c3209c065a7?auto=format&fit=crop&w=1600&q=80"
-          alt="Campo de futebol"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary/40" />
         <div className="relative h-full flex flex-col justify-center px-6 sm:px-10 text-white">
           <div className="flex items-center gap-2 mb-2">
             <span className="bg-[hsl(var(--accent))] text-black px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest">Pro</span>
