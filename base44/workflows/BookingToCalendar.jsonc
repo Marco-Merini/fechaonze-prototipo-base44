@@ -1,0 +1,40 @@
+{
+  "name": "Sincronizar Reserva no Google Calendar",
+  "description": "Cria um evento no Google Calendar para cada reserva confirmada",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Booking",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status == \"confirmado\" and .trigger.old_data.status != \"confirmado\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "booking_to_calendar",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_event": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncBookingToCalendar",
+            "args": {
+              "booking_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Criar evento no calend\u00e1rio",
+            "description": "Reserva confirmada"
+          }
+        }
+      }
+    ]
+  }
+}
