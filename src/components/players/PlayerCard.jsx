@@ -3,7 +3,7 @@ import { User } from "lucide-react";
 import { computeOverall, tierColor, ATTR_LABELS } from "@/lib/playerStats";
 
 export default function PlayerCard({ player, onClick, size = "md" }) {
-  const overall = player.overall ?? computeOverall(player);
+  const overall = computeOverall(player);
   const tier = tierColor(overall);
   const dims = size === "lg" ? "w-64" : "w-52";
 

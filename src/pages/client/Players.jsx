@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Users } from "lucide-react";
+import { Search, Users, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PlayerCard from "@/components/players/PlayerCard";
+import CreatePlayer from "@/components/players/CreatePlayer";
 import { Link } from "react-router-dom";
 
 export default function Players() {
@@ -11,17 +13,18 @@ export default function Players() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState("todos");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await base44.entities.Player.list("-overall", 100);
-        setPlayers(data);
-      } catch (e) { console.error(e); }
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const load = async () => {
+    setLoading(true);
+    try {
+      const data = await base44.entities.Player.list("-overall", 100);
+      setPlayers(data);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const filtered = players.filter((p) => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.city || "").toLowerCase().includes(search.toLowerCase());
@@ -39,9 +42,14 @@ export default function Players() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-heading font-bold">Jogadores ⚽</h1>
-        <p className="text-muted-foreground mt-1">Cards e Overall da galera</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold">Jogadores ⚽</h1>
+          <p className="text-muted-foreground mt-1">Cards e Overall da galera</p>
+        </div>
+        <Button onClick={() => setDialogOpen(true)} className="rounded-xl gap-2">
+          <Plus className="w-4 h-4" /> Cadastrar Jogador
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -79,6 +87,8 @@ export default function Players() {
           ))}
         </div>
       )}
+
+      <CreatePlayer open={dialogOpen} onOpenChange={setDialogOpen} onCreated={load} />
     </div>
   );
 }

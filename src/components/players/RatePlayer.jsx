@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { blendOverall, computeOverall } from "@/lib/playerStats";
 
 export default function RatePlayer({ open, onOpenChange, player, user, onRated }) {
   const { toast } = useToast();
@@ -26,13 +25,9 @@ export default function RatePlayer({ open, onOpenChange, player, user, onRated }
         comment,
       });
 
-      const all = await base44.entities.PlayerRating.filter({ player_id: player.id });
-      const avg = all.reduce((s, r) => s + r.overall_rating, 0) / (all.length || 1);
-      const baseOverall = computeOverall(player);
-      const blended = blendOverall(baseOverall, avg);
-      await base44.entities.Player.update(player.id, { overall: blended, games_played: (player.games_played || 0) + 1 });
+      await base44.entities.Player.update(player.id, { games_played: (player.games_played || 0) + 1 });
 
-      toast({ title: "Avaliação registrada!", description: `Overall atualizado para ${blended}.` });
+      toast({ title: "Avaliação registrada!" });
       onOpenChange(false);
       setComment("");
       setRating(8);
