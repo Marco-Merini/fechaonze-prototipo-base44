@@ -26,7 +26,7 @@ export default function TimeSlots() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCourt, setSelectedCourt] = useState("");
-  const [form, setForm] = useState({ court_id: "", weekday: "", start_time: "", end_time: "" });
+  const [form, setForm] = useState({ court_id: "", weekdays: [], start_time: "", end_time: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -53,10 +53,22 @@ export default function TimeSlots() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.weekdays.length === 0) {
+      toast({ title: "Selecione ao menos um dia da semana", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     try {
-      await base44.entities.TimeSlot.create({ ...form, is_available: true });
-      toast({ title: "Horário adicionado!" });
+      await base44.entities.TimeSlot.bulkCreate(
+        form.weekdays.map((w) => ({
+          court_id: form.court_id,
+          weekday: w,
+          start_time: form.start_time,
+          end_time: form.end_time,
+          is_available: true,
+        }))
+      );
+      toast({ title: `${form.weekdays.length} horário(s) adicionado(s)!` });
       setDialogOpen(false);
       load();
     } catch (e) {
@@ -91,7 +103,7 @@ export default function TimeSlots() {
           <h1 className="text-2xl sm:text-3xl font-heading font-bold">Horários</h1>
           <p className="text-muted-foreground mt-1">Gerencie os horários disponíveis</p>
         </div>
-        <Button onClick={() => { setForm({ court_id: selectedCourt || "", weekday: "", start_time: "", end_time: "" }); setDialogOpen(true); }} className="rounded-xl gap-2" disabled={courts.length === 0}>
+        <Button onClick={() => { setForm({ court_id: selectedCourt || "", weekdays: [], start_time: "", end_time: "" }); setDialogOpen(true); }} className="rounded-xl gap-2" disabled={courts.length === 0}>
           <Plus className="w-4 h-4" /> Novo Horário
         </Button>
       </div>
@@ -167,13 +179,31 @@ export default function TimeSlots() {
               </Select>
             </div>
             <div>
-              <Label>Dia da semana *</Label>
-              <Select value={form.weekday} onValueChange={(v) => setForm({ ...form, weekday: v })} required>
-                <SelectTrigger className="rounded-xl mt-1"><SelectValue placeholder="Selecione o dia" /></SelectTrigger>
-                <SelectContent>
-                  {WEEKDAYS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label>Dias da semana * <span className="text-muted-foreground font-normal">(selecione um ou mais)</span></Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {WEEKDAYS.map((d) => {
+                  const active = form.weekdays.includes(d.value);
+                  return (
+                    <button
+                      key={d.value}
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          weekdays: active ? f.weekdays.filter((w) => w !== d.value) : [...f.weekdays, d.value],
+                        }))
+                      }
+                      className={`px-3 py-2 rounded-xl text-sm font-medium border transition-all ${
+                        active
+                          ? "bg-primary text-white border-primary"
+                          : "bg-card border-border text-muted-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
