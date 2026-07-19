@@ -54,6 +54,11 @@
       "default": false,
       "description": "Se o lembrete por email ja foi enviado"
     },
+    "whatsapp_reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o lembrete por WhatsApp (link wa.me) ja foi gerado/enviado"
+    },
     "calendar_event_id": {
       "type": "string",
       "description": "ID do evento criado no Google Calendar"

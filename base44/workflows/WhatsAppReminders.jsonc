@@ -1,0 +1,44 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "whatsapp_reminder_links",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_links": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendWhatsAppReminderLinks"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Gerar lembretes de WhatsApp",
+            "description": "Reservas confirmadas de amanh\u00e3"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Lembretes de WhatsApp",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Gera links wa.me de lembrete para reservas confirmadas do dia seguinte e envia digest por e-mail ao dono"
+}
