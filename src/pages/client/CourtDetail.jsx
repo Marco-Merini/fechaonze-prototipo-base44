@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, ArrowLeft, CalendarCheck } from "lucide-react";
+import { MapPin, Clock, ArrowLeft, CalendarCheck, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+
+const WEEKDAY_BY_JS = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
+const WEEKDAY_LABEL = {
+  domingo: "Domingo",
+  segunda: "Segunda-feira",
+  terca: "Terça-feira",
+  quarta: "Quarta-feira",
+  quinta: "Quinta-feira",
+  sexta: "Sexta-feira",
+  sabado: "Sábado",
+};
+const WEEKDAY_ORDER = { domingo: 0, segunda: 1, terca: 2, quarta: 3, quinta: 4, sexta: 5, sabado: 6 };
+
+const todayStr = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+const weekdayOf = (dateStr) => {
+  const d = new Date(dateStr + "T12:00:00");
+  return WEEKDAY_BY_JS[d.getDay()];
+};
 
 export default function CourtDetail() {
   const { id } = useParams();
@@ -14,7 +32,9 @@ export default function CourtDetail() {
   const { toast } = useToast();
   const [court, setCourt] = useState(null);
   const [slots, setSlots] = useState([]);
+  const [bookedTimes, setBookedTimes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(todayStr());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [form, setForm] = useState({ client_name: "", client_phone: "", client_email: "" });
@@ -28,12 +48,33 @@ export default function CourtDetail() {
           base44.entities.TimeSlot.filter({ court_id: id, is_available: true }),
         ]);
         setCourt(c);
-        setSlots(s.sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time)));
+        setSlots(
+          s.sort(
+            (a, b) =>
+              (WEEKDAY_ORDER[a.weekday] ?? 99) - (WEEKDAY_ORDER[b.weekday] ?? 99) ||
+              a.start_time.localeCompare(b.start_time)
+          )
+        );
       } catch (e) { console.error(e); }
       setLoading(false);
     };
     load();
   }, [id]);
+
+  // Busca reservas já existentes para a data selecionada (para não mostrar horários ocupados)
+  useEffect(() => {
+    if (!selectedDate) return;
+    let active = true;
+    (async () => {
+      try {
+        const bks = await base44.entities.Booking.filter({ court_id: id, date: selectedDate });
+        if (active) {
+          setBookedTimes(bks.filter((b) => b.status !== "cancelado").map((b) => b.start_time));
+        }
+      } catch (e) { console.error(e); }
+    })();
+    return () => { active = false; };
+  }, [id, selectedDate]);
 
   const handleBook = (slot) => {
     setSelectedSlot(slot);
@@ -44,23 +85,33 @@ export default function CourtDetail() {
     e.preventDefault();
     setSaving(true);
     try {
+      // checagem extra contra agendamento duplicado no mesmo horário/data
+      const existing = await base44.entities.Booking.filter({
+        court_id: id,
+        date: selectedDate,
+        start_time: selectedSlot.start_time,
+      });
+      if (existing.some((b) => b.status !== "cancelado")) {
+        toast({ title: "Horário ocupado", description: "Esse horário já foi reservado.", variant: "destructive" });
+        setSaving(false);
+        return;
+      }
       await base44.entities.Booking.create({
         court_id: id,
         time_slot_id: selectedSlot.id,
         client_name: form.client_name,
         client_phone: form.client_phone,
         client_email: form.client_email,
-        date: selectedSlot.date,
+        date: selectedDate,
         start_time: selectedSlot.start_time,
         end_time: selectedSlot.end_time,
         court_name: court.name,
         status: "pendente",
       });
-      await base44.entities.TimeSlot.update(selectedSlot.id, { is_available: false });
       toast({ title: "Agendamento realizado!", description: "O dono da quadra entrará em contato para confirmar." });
       setDialogOpen(false);
       setForm({ client_name: "", client_phone: "", client_email: "" });
-      setSlots((prev) => prev.filter((s) => s.id !== selectedSlot.id));
+      setBookedTimes((prev) => [...prev, selectedSlot.start_time]);
     } catch (e) {
       toast({ title: "Erro ao agendar", description: e.message, variant: "destructive" });
     }
@@ -84,11 +135,14 @@ export default function CourtDetail() {
     );
   }
 
-  // Group slots by date
-  const slotsByDate = {};
-  slots.forEach((s) => {
-    if (!slotsByDate[s.date]) slotsByDate[s.date] = [];
-    slotsByDate[s.date].push(s);
+  const targetWeekday = weekdayOf(selectedDate);
+  const daySlots = slots.filter((s) => s.weekday === targetWeekday);
+  const availableSlots = daySlots.filter((s) => !bookedTimes.includes(s.start_time));
+
+  const formattedDate = new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
 
   return (
@@ -127,34 +181,46 @@ export default function CourtDetail() {
           <Clock className="w-5 h-5 text-primary" /> Horários Disponíveis
         </h2>
 
-        {Object.keys(slotsByDate).length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 mb-4">
+          <Label className="flex items-center gap-2 mb-2">
+            <Calendar className="w-4 h-4 text-primary" /> Escolha a data
+          </Label>
+          <Input
+            type="date"
+            value={selectedDate}
+            min={todayStr()}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="rounded-xl max-w-xs"
+          />
+          <p className="text-sm text-muted-foreground mt-2 capitalize">{formattedDate} • {WEEKDAY_LABEL[targetWeekday]}</p>
+        </div>
+
+        {daySlots.length === 0 ? (
           <div className="bg-card rounded-2xl border border-border p-12 text-center">
             <CalendarCheck className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-            <p className="text-muted-foreground">Nenhum horário disponível no momento</p>
+            <p className="text-muted-foreground">Nenhum horário cadastrado para {WEEKDAY_LABEL[targetWeekday].toLowerCase()}</p>
             <Button variant="outline" className="mt-4 rounded-xl" onClick={() => navigate("/explore")}>
               Ver outras quadras
             </Button>
           </div>
+        ) : availableSlots.length === 0 ? (
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <Clock className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+            <p className="text-muted-foreground">Todos os horários deste dia já estão reservados</p>
+          </div>
         ) : (
-          <div className="space-y-4">
-            {Object.entries(slotsByDate).map(([date, dateSlots]) => (
-              <div key={date} className="bg-card rounded-2xl border border-border">
-                <div className="px-5 py-3 border-b border-border bg-muted/50 rounded-t-2xl">
-                  <p className="font-medium text-sm">{new Date(date + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</p>
-                </div>
-                <div className="p-4 flex flex-wrap gap-2">
-                  {dateSlots.map((slot) => (
-                    <button
-                      key={slot.id}
-                      onClick={() => handleBook(slot)}
-                      className="px-4 py-2.5 rounded-xl border border-primary/20 text-primary font-medium text-sm hover:bg-primary hover:text-white transition-all duration-200 hover:shadow-sm"
-                    >
-                      {slot.start_time} — {slot.end_time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="bg-card rounded-2xl border border-border">
+            <div className="p-4 flex flex-wrap gap-2">
+              {availableSlots.map((slot) => (
+                <button
+                  key={slot.id}
+                  onClick={() => handleBook(slot)}
+                  className="px-4 py-2.5 rounded-xl border border-primary/20 text-primary font-medium text-sm hover:bg-primary hover:text-white transition-all duration-200 hover:shadow-sm"
+                >
+                  {slot.start_time} — {slot.end_time}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -167,7 +233,7 @@ export default function CourtDetail() {
           {selectedSlot && (
             <div className="bg-muted/50 rounded-xl p-4 mb-2">
               <p className="font-medium">{court.name}</p>
-              <p className="text-sm text-muted-foreground">{selectedSlot.date} • {selectedSlot.start_time} — {selectedSlot.end_time}</p>
+              <p className="text-sm text-muted-foreground capitalize">{formattedDate} • {selectedSlot.start_time} — {selectedSlot.end_time}</p>
               <p className="text-primary font-bold mt-1">R$ {court.price_per_hour?.toFixed(2)}</p>
             </div>
           )}

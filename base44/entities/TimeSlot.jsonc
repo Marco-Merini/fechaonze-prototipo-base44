@@ -6,10 +6,18 @@
       "type": "string",
       "description": "ID da quadra"
     },
-    "date": {
+    "weekday": {
       "type": "string",
-      "format": "date",
-      "description": "Data do hor\u00e1rio"
+      "enum": [
+        "domingo",
+        "segunda",
+        "terca",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sabado"
+      ],
+      "description": "Dia da semana"
     },
     "start_time": {
       "type": "string",
@@ -27,7 +35,7 @@
   },
   "required": [
     "court_id",
-    "date",
+    "weekday",
     "start_time",
     "end_time"
   ]

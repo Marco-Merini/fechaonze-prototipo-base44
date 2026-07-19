@@ -8,13 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 
+const WEEKDAYS = [
+  { value: "domingo", label: "Domingo" },
+  { value: "segunda", label: "Segunda-feira" },
+  { value: "terca", label: "Terça-feira" },
+  { value: "quarta", label: "Quarta-feira" },
+  { value: "quinta", label: "Quinta-feira" },
+  { value: "sexta", label: "Sexta-feira" },
+  { value: "sabado", label: "Sábado" },
+];
+const WEEKDAY_ORDER = { domingo: 0, segunda: 1, terca: 2, quarta: 3, quinta: 4, sexta: 5, sabado: 6 };
+const weekdayLabel = (w) => WEEKDAYS.find((d) => d.value === w)?.label || w;
+
 export default function TimeSlots() {
   const [courts, setCourts] = useState([]);
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCourt, setSelectedCourt] = useState("");
-  const [form, setForm] = useState({ court_id: "", date: "", start_time: "", end_time: "" });
+  const [form, setForm] = useState({ court_id: "", weekday: "", start_time: "", end_time: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
@@ -23,7 +35,7 @@ export default function TimeSlots() {
     try {
       const [c, s] = await Promise.all([
         base44.entities.Court.list(),
-        base44.entities.TimeSlot.list("-date", 200),
+        base44.entities.TimeSlot.list("-created_date", 500),
       ]);
       setCourts(c);
       setSlots(s);
@@ -34,7 +46,9 @@ export default function TimeSlots() {
 
   useEffect(() => { load(); }, []);
 
-  const filteredSlots = slots.filter((s) => s.court_id === selectedCourt);
+  const filteredSlots = slots
+    .filter((s) => s.court_id === selectedCourt)
+    .sort((a, b) => (WEEKDAY_ORDER[a.weekday] ?? 99) - (WEEKDAY_ORDER[b.weekday] ?? 99) || a.start_time.localeCompare(b.start_time));
   const courtName = (id) => courts.find((c) => c.id === id)?.name || "";
 
   const handleSubmit = async (e) => {
@@ -77,7 +91,7 @@ export default function TimeSlots() {
           <h1 className="text-2xl sm:text-3xl font-heading font-bold">Horários</h1>
           <p className="text-muted-foreground mt-1">Gerencie os horários disponíveis</p>
         </div>
-        <Button onClick={() => { setForm({ court_id: selectedCourt || "", date: "", start_time: "", end_time: "" }); setDialogOpen(true); }} className="rounded-xl gap-2" disabled={courts.length === 0}>
+        <Button onClick={() => { setForm({ court_id: selectedCourt || "", weekday: "", start_time: "", end_time: "" }); setDialogOpen(true); }} className="rounded-xl gap-2" disabled={courts.length === 0}>
           <Plus className="w-4 h-4" /> Novo Horário
         </Button>
       </div>
@@ -118,7 +132,7 @@ export default function TimeSlots() {
                       <Clock className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">{slot.date}</p>
+                      <p className="font-medium">{weekdayLabel(slot.weekday)}</p>
                       <p className="text-sm text-muted-foreground">{slot.start_time} — {slot.end_time}</p>
                     </div>
                   </div>
@@ -153,8 +167,13 @@ export default function TimeSlots() {
               </Select>
             </div>
             <div>
-              <Label>Data *</Label>
-              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="rounded-xl mt-1" />
+              <Label>Dia da semana *</Label>
+              <Select value={form.weekday} onValueChange={(v) => setForm({ ...form, weekday: v })} required>
+                <SelectTrigger className="rounded-xl mt-1"><SelectValue placeholder="Selecione o dia" /></SelectTrigger>
+                <SelectContent>
+                  {WEEKDAYS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
