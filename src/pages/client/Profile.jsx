@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { User, Sun, Moon, Palette, Mail, Copy, Hash, Lock } from "lucide-react";
+import { User, Sun, Moon, Palette, Mail, Copy, Hash, Lock, Camera } from "lucide-react";
+import { Image } from "@/components/ui/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ export default function Profile() {
   const [dark, setDark] = useState(false);
   const [playerForm, setPlayerForm] = useState({ username: "", user_code: "", sports: [], positions: [] });
   const [savingPlayer, setSavingPlayer] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const { toast } = useToast();
@@ -31,6 +34,7 @@ export default function Profile() {
       try {
         const me = await base44.auth.me();
         setUser(me);
+        setPhotoUrl(me.photo_url || null);
         setForm({ phone: me.phone || "", city: me.city || "" });
         setPlayerForm({
           username: me.username || "",
@@ -70,6 +74,23 @@ export default function Profile() {
   const copyCode = () => {
     navigator.clipboard?.writeText(playerForm.user_code);
     toast({ title: "Código copiado!" });
+  };
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ photo_url: file_url });
+      setPhotoUrl(file_url);
+      setUser((u) => ({ ...u, photo_url: file_url }));
+      toast({ title: "Foto de perfil atualizada!" });
+    } catch (err) {
+      toast({ title: "Erro ao enviar foto", variant: "destructive" });
+    }
+    setUploadingPhoto(false);
+    e.target.value = "";
   };
 
   const handleSavePlayer = async (e) => {
@@ -259,14 +280,30 @@ export default function Profile() {
         </div>
 
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-            <User className="w-8 h-8 text-primary" />
+          <div className="relative group shrink-0">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center">
+              {photoUrl ? (
+                <Image src={photoUrl} alt={user?.full_name} fittingType="fill" className="w-full h-full" />
+              ) : (
+                <User className="w-9 h-9 text-primary" />
+              )}
+            </div>
+            <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer shadow-md hover:bg-primary/90 transition-colors">
+              <Camera className="w-4 h-4" />
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} disabled={uploadingPhoto} />
+            </label>
+            {uploadingPhoto && (
+              <div className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              </div>
+            )}
           </div>
           <div className="min-w-0">
             <p className="font-heading font-semibold text-lg truncate">{user?.full_name || "Usuário"}</p>
             <p className="text-sm text-muted-foreground flex items-center gap-1.5 truncate">
               <Mail className="w-3.5 h-3.5 shrink-0" /> {user?.email || "—"}
             </p>
+            <p className="text-xs text-muted-foreground mt-1">Toque na câmera para alterar sua foto</p>
           </div>
         </div>
 
