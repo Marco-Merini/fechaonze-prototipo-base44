@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, MapPin, UserPlus, UserCheck, Star } from "lucide-react";
+import { ArrowLeft, MapPin, UserPlus, UserCheck, Star, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import PlayerCard from "@/components/players/PlayerCard";
@@ -18,6 +18,7 @@ export default function PlayerDetail() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
+  const [comments, setComments] = useState([]);
   const { toast } = useToast();
 
   const load = async () => {
@@ -28,6 +29,13 @@ export default function PlayerDetail() {
       const p = res.data?.player;
       setPlayer(p);
       setFollowing(!!p?.i_follow);
+      const ratings = await base44.entities.PlayerRating.filter({ player_id: id }, "-created_date", 50);
+      setComments(ratings.filter((r) => r.comment && r.comment.trim()).map((r) => ({
+        id: r.id,
+        name: r.rater_name || "Anônimo",
+        comment: r.comment.trim(),
+        date: r.created_date,
+      })));
     } catch (e) {
       console.error(e);
     }
@@ -146,6 +154,35 @@ export default function PlayerDetail() {
       )}
 
       <RateAttributes open={rateOpen} onOpenChange={setRateOpen} player={player} onRated={load} />
+
+      {hasFootball && (
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <MessageCircle className="w-5 h-5 text-primary" />
+            <h3 className="font-heading font-bold">Comentários das avaliações</h3>
+          </div>
+          {comments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum comentário ainda. Avalie este jogador para deixar um comentário!</p>
+          ) : (
+            <div className="space-y-3">
+              {comments.map((c) => (
+                <div key={c.id} className="flex gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                    {(c.name || "?").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 bg-muted/50 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="font-semibold text-sm">{c.name}</p>
+                      {c.date && <p className="text-xs text-muted-foreground">{new Date(c.date).toLocaleDateString("pt-BR")}</p>}
+                    </div>
+                    <p className="text-sm text-foreground/90 whitespace-pre-wrap">{c.comment}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
