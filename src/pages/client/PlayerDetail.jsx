@@ -1,35 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Star, MapPin, Gamepad2, MessageSquare } from "lucide-react";
+import { ArrowLeft, MapPin, UserPlus, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import PlayerCard from "@/components/players/PlayerCard";
-import RatePlayer from "@/components/players/RatePlayer";
-import { ATTR_LABELS, tierColor } from "@/lib/playerStats";
+import { ATTR_LABELS, tierColor, computeOverall } from "@/lib/playerStats";
 
 export default function PlayerDetail() {
   const { id } = useParams();
   const [player, setPlayer] = useState(null);
-  const [ratings, setRatings] = useState([]);
-  const [user, setUser] = useState(null);
+  const [me, setMe] = useState(null);
+  const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [rateOpen, setRateOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const { toast } = useToast();
 
   const load = async () => {
     try {
-      const [p, r, me] = await Promise.all([
-        base44.entities.Player.get(id),
-        base44.entities.PlayerRating.filter({ player_id: id }),
-        base44.auth.me(),
-      ]);
-      setPlayer(p);
-      setRatings(r);
-      setUser(me);
+      const meUser = await base44.auth.me();
+      setMe(meUser);
+      const res = await base44.functions.invoke("playerSocial", { action: "getById", id });
+      setPlayer(res.data?.player);
+      const myFollows = await base44.entities.Follow.filter({ follower_id: meUser.id, following_id: id });
+      setFollowing(myFollows.length > 0);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
 
   useEffect(() => { load(); }, [id]);
+
+  const toggleFollow = async () => {
+    if (!me) return;
+    setBusy(true);
+    try {
+      if (following) {
+        await base44.entities.Follow.deleteMany({ follower_id: me.id, following_id: id });
+        setFollowing(false);
+        toast({ title: "Deixou de seguir" });
+      } else {
+        await base44.entities.Follow.create({ follower_id: me.id, following_id: id });
+        setFollowing(true);
+        toast({ title: "Seguindo!" });
+      }
+    } catch (e) { toast({ title: "Erro", variant: "destructive" }); }
+    setBusy(false);
+  };
 
   if (loading) {
     return (
@@ -48,8 +64,9 @@ export default function PlayerDetail() {
     );
   }
 
-  const avg = ratings.length ? (ratings.reduce((s, r) => s + r.overall_rating, 0) / ratings.length).toFixed(1) : null;
-  const tier = tierColor(player.overall ?? 0);
+  const overall = computeOverall(player);
+  const tier = tierColor(overall);
+  const name = player.name || player.full_name;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -61,25 +78,24 @@ export default function PlayerDetail() {
         <PlayerCard player={player} size="lg" />
         <div className="flex-1 space-y-3">
           <div>
-            <h1 className="text-2xl font-heading font-bold uppercase">{player.name}</h1>
+            <h1 className="text-2xl font-heading font-bold uppercase">{name}</h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
               <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${tier.text} bg-gradient-to-r ${tier.bg}`}>{tier.label}</span>
               <MapPin className="w-4 h-4" /> {player.city || "—"}
             </p>
+            <p className="text-sm text-muted-foreground mt-1">@{player.username} • código: <span className="font-mono">{player.user_code}</span></p>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="bg-card rounded-xl border border-border p-3">
-              <p className="text-xs text-muted-foreground uppercase font-bold">Partidas</p>
-              <p className="text-xl font-bold flex items-center gap-1.5"><Gamepad2 className="w-4 h-4 text-primary" /> {player.games_played || 0}</p>
-            </div>
-            <div className="bg-card rounded-xl border border-border p-3">
-              <p className="text-xs text-muted-foreground uppercase font-bold">Nota média</p>
-              <p className="text-xl font-bold flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-500" /> {avg || "—"}</p>
-            </div>
-          </div>
-          <Button className="rounded-xl w-full sm:w-auto gap-2" onClick={() => setRateOpen(true)}>
-            <MessageSquare className="w-4 h-4" /> Avaliar jogador
-          </Button>
+          {me && me.id !== id && (
+            following ? (
+              <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
+                <UserCheck className="w-4 h-4" /> Seguindo
+              </Button>
+            ) : (
+              <Button className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
+                <UserPlus className="w-4 h-4" /> Seguir
+              </Button>
+            )
+          )}
         </div>
       </div>
 
@@ -100,29 +116,6 @@ export default function PlayerDetail() {
           })}
         </div>
       </div>
-
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <h3 className="font-heading font-bold mb-3">Avaliações ({ratings.length})</h3>
-        {ratings.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">Ainda sem avaliações. Seja o primeiro!</p>
-        ) : (
-          <div className="space-y-3">
-            {ratings.map((r) => (
-              <div key={r.id} className="flex items-start gap-3 pb-3 border-b border-border last:border-0 last:pb-0">
-                <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
-                  <Star className="w-4 h-4 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">{r.rater_name} <span className="text-amber-600 font-bold">• {r.overall_rating}/10</span></p>
-                  {r.comment && <p className="text-sm text-muted-foreground mt-0.5">{r.comment}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <RatePlayer open={rateOpen} onOpenChange={setRateOpen} player={player} user={user} onRated={load} />
     </div>
   );
 }

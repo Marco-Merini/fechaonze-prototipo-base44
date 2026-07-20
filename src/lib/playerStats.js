@@ -5,7 +5,7 @@ const positionWeights = {
   VOL: { passing: 0.25, defending: 0.2, physical: 0.2, dribbling: 0.15, pace: 0.1, shooting: 0.1 },
   MEI: { passing: 0.25, dribbling: 0.25, shooting: 0.2, pace: 0.1, physical: 0.1, defending: 0.1 },
   EXT: { pace: 0.3, dribbling: 0.25, shooting: 0.2, passing: 0.15, physical: 0.05, defending: 0.05 },
-  ATA: { shooting: 0.35, pace: 0.25, physical: 0.2, dribbling: 0.1, passing: 0.05, defending: 0.05 },
+  ATA: { shooting: 0.3, pace: 0.25, dribbling: 0.2, physical: 0.15, passing: 0.07, defending: 0.03 },
 };
 
 export function computeOverall(player) {
@@ -40,4 +40,14 @@ export const ATTR_LABELS = [
   { key: "dribbling", short: "DRI", label: "Drible" },
   { key: "defending", short: "DEF", label: "Defesa" },
   { key: "physical", short: "FIS", label: "Físico" },
+];
+
+export const POSITIONS = [
+  { value: "GOL", label: "Goleiro" },
+  { value: "ZAG", label: "Zagueiro" },
+  { value: "LAT", label: "Lateral" },
+  { value: "VOL", label: "Volante" },
+  { value: "MEI", label: "Meia" },
+  { value: "EXT", label: "Extremo" },
+  { value: "ATA", label: "Atacante" },
 ];

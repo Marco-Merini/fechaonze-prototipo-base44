@@ -6,6 +6,7 @@ export default function PlayerCard({ player, onClick, size = "md" }) {
   const overall = computeOverall(player);
   const tier = tierColor(overall);
   const dims = size === "lg" ? "w-64" : "w-52";
+  const name = player.name || player.full_name;
 
   return (
     <div
@@ -20,13 +21,13 @@ export default function PlayerCard({ player, onClick, size = "md" }) {
           </div>
           <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/40 overflow-hidden flex items-center justify-center">
             {player.photo_url ? (
-              <img src={player.photo_url} alt={player.name} className="w-full h-full object-cover" />
+              <img src={player.photo_url} alt={name} className="w-full h-full object-cover" />
             ) : (
               <User className="w-8 h-8 text-white/70" />
             )}
           </div>
         </div>
-        <h3 className="font-heading font-bold text-lg mt-2 truncate uppercase tracking-wide">{player.name}</h3>
+        <h3 className="font-heading font-bold text-lg mt-2 truncate uppercase tracking-wide">{name}</h3>
         <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-3 text-left text-xs font-semibold">
           {ATTR_LABELS.map((a) => (
             <div key={a.key} className="flex justify-between">

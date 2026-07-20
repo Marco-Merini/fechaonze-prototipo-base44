@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { User, Sun, Moon, Palette, Mail } from "lucide-react";
+import { User, Sun, Moon, Palette, Mail, Copy, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { computeOverall, tierColor, ATTR_LABELS, POSITIONS } from "@/lib/playerStats";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -12,7 +14,14 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dark, setDark] = useState(false);
+  const [playerForm, setPlayerForm] = useState({
+    username: "", user_code: "", position: "ATA",
+    pace: 70, shooting: 70, passing: 70, dribbling: 70, defending: 70, physical: 70,
+  });
+  const [savingPlayer, setSavingPlayer] = useState(false);
   const { toast } = useToast();
+
+  const genCode = () => Math.random().toString(36).slice(2, 8).toUpperCase();
 
   useEffect(() => {
     setDark(localStorage.getItem("theme") === "dark");
@@ -21,6 +30,13 @@ export default function Profile() {
         const me = await base44.auth.me();
         setUser(me);
         setForm({ phone: me.phone || "", city: me.city || "" });
+        setPlayerForm({
+          username: me.username || "",
+          user_code: me.user_code || genCode(),
+          position: me.position || "ATA",
+          pace: me.pace ?? 70, shooting: me.shooting ?? 70, passing: me.passing ?? 70,
+          dribbling: me.dribbling ?? 70, defending: me.defending ?? 70, physical: me.physical ?? 70,
+        });
       } catch (e) { console.error(e); }
       setLoading(false);
     };
@@ -37,6 +53,45 @@ export default function Profile() {
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
+  };
+
+  const overall = computeOverall(playerForm);
+  const tier = tierColor(overall);
+
+  const copyCode = () => {
+    navigator.clipboard?.writeText(playerForm.user_code);
+    toast({ title: "Código copiado!" });
+  };
+
+  const handleSavePlayer = async (e) => {
+    e.preventDefault();
+    if (!playerForm.username.trim()) {
+      toast({ title: "Informe um nome de usuário", variant: "destructive" });
+      return;
+    }
+    setSavingPlayer(true);
+    try {
+      const res = await base44.functions.invoke("playerSocial", { action: "search", query: playerForm.username.trim() });
+      const taken = (res.data?.players || []).some(
+        (p) => (p.username || "").toLowerCase() === playerForm.username.trim().toLowerCase() && p.id !== user?.id
+      );
+      if (taken) {
+        toast({ title: "Nome de usuário já existe", variant: "destructive" });
+        setSavingPlayer(false);
+        return;
+      }
+      await base44.auth.updateMe({
+        username: playerForm.username.trim(),
+        user_code: playerForm.user_code,
+        position: playerForm.position,
+        pace: playerForm.pace, shooting: playerForm.shooting, passing: playerForm.passing,
+        dribbling: playerForm.dribbling, defending: playerForm.defending, physical: playerForm.physical,
+      });
+      toast({ title: "Card atualizado!" });
+    } catch (e) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+    }
+    setSavingPlayer(false);
   };
 
   const handleSave = async (e) => {
@@ -97,6 +152,65 @@ export default function Profile() {
             </button>
           </div>
         </div>
+      </section>
+
+      {/* Meu Card de Jogador */}
+      <section className="bg-card rounded-2xl border border-border p-6 sm:p-8">
+        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
+          <Hash className="w-5 h-5 text-primary" />
+          <h2 className="font-heading font-semibold text-lg">Meu Card</h2>
+        </div>
+
+        <div className="flex items-center gap-5 mb-6">
+          <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${tier.bg} flex items-center justify-center shrink-0`}>
+            <span className={`text-3xl font-extrabold ${tier.text}`}>{overall}</span>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Seu Overall</p>
+            <p className="font-heading font-bold text-xl">{tier.label}</p>
+            <p className="text-sm text-muted-foreground">Posição: {playerForm.position}</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSavePlayer} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label>Nome de usuário *</Label>
+              <Input value={playerForm.username} onChange={(e) => setPlayerForm((f) => ({ ...f, username: e.target.value }))} placeholder="seu_usuario" className="rounded-xl mt-1" />
+            </div>
+            <div>
+              <Label>Seu código</Label>
+              <div className="flex gap-2 mt-1">
+                <Input value={playerForm.user_code} readOnly className="rounded-xl font-mono" />
+                <Button type="button" variant="outline" size="icon" className="rounded-xl shrink-0" onClick={copyCode}><Copy className="w-4 h-4" /></Button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Label>Posição</Label>
+            <Select value={playerForm.position} onValueChange={(v) => setPlayerForm((f) => ({ ...f, position: v }))}>
+              <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {POSITIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="mb-0">Atributos (0-99)</Label>
+              <span className="text-sm font-bold text-primary">OVER {overall}</span>
+            </div>
+            {ATTR_LABELS.map((a) => (
+              <div key={a.key} className="flex items-center gap-3">
+                <span className="text-sm font-medium w-24">{a.label}</span>
+                <input type="range" min={0} max={99} value={playerForm[a.key]} onChange={(e) => setPlayerForm((f) => ({ ...f, [a.key]: Number(e.target.value) }))} className="flex-1 accent-primary" />
+                <span className="text-sm font-bold w-8 text-right">{playerForm[a.key]}</span>
+              </div>
+            ))}
+            <p className="text-xs text-muted-foreground">O Overall é calculado por média ponderada conforme a posição do jogador.</p>
+          </div>
+          <Button type="submit" className="rounded-xl w-full" disabled={savingPlayer}>{savingPlayer ? "Salvando..." : "Salvar card"}</Button>
+        </form>
       </section>
 
       {/* Minha Conta */}
