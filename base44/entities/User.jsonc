@@ -9,7 +9,7 @@
         "cliente"
       ],
       "default": "cliente",
-      "description": "Tipo de conta: dono de quadra ou cliente"
+      "description": "Tipo de conta"
     },
     "username": {
       "type": "string",
@@ -17,7 +17,7 @@
     },
     "user_code": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do usu\u00e1rio para busca"
+      "description": "C\u00f3digo \u00fanico do usu\u00e1rio"
     },
     "phone": {
       "type": "string",
@@ -78,12 +78,17 @@
     "overall": {
       "type": "number",
       "default": 0,
-      "description": "Overall calculado pela m\u00e9dia ponderada das avalia\u00e7\u00f5es"
+      "description": "Overall calculado"
     },
     "ratings_count": {
       "type": "number",
       "default": 0,
       "description": "N\u00famero de avalia\u00e7\u00f5es recebidas"
+    },
+    "is_private": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a conta \u00e9 privada (exige aprova\u00e7\u00e3o de seguidores)"
     }
   }
 }

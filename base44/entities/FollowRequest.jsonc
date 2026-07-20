@@ -1,0 +1,37 @@
+{
+  "name": "FollowRequest",
+  "type": "object",
+  "properties": {
+    "requester_id": {
+      "type": "string",
+      "description": "ID de quem solicitou"
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Nome de quem solicitou"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID de quem recebe a solicita\u00e7\u00e3o"
+    },
+    "target_name": {
+      "type": "string",
+      "description": "Nome de quem recebe"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Status da solicita\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "requester_id",
+    "target_id",
+    "status"
+  ]
+}

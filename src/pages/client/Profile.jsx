@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { User, Sun, Moon, Palette, Mail, Copy, Hash } from "lucide-react";
+import { User, Sun, Moon, Palette, Mail, Copy, Hash, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 import { computeOverall, tierColor, ATTR_LABELS, POSITIONS } from "@/lib/playerStats";
 
 export default function Profile() {
@@ -16,6 +18,10 @@ export default function Profile() {
   const [dark, setDark] = useState(false);
   const [playerForm, setPlayerForm] = useState({ username: "", user_code: "", position: "ATA" });
   const [savingPlayer, setSavingPlayer] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [savingPrivate, setSavingPrivate] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const { toast } = useToast();
 
   const genCode = () => Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -32,6 +38,13 @@ export default function Profile() {
           user_code: me.user_code || genCode(),
           position: me.position || "ATA",
         });
+        setIsPrivate(!!me.is_private);
+        const [fol, ing] = await Promise.all([
+          base44.entities.Follow.filter({ following_id: me.id }),
+          base44.entities.Follow.filter({ follower_id: me.id }),
+        ]);
+        setFollowersCount(fol.length);
+        setFollowingCount(ing.length);
       } catch (e) { console.error(e); }
       setLoading(false);
     };
@@ -53,6 +66,20 @@ export default function Profile() {
   const overall = user ? (user.overall ?? computeOverall(user)) : 0;
   const tier = tierColor(overall);
   const ratingsCount = user?.ratings_count || 0;
+
+  const togglePrivate = async () => {
+    setSavingPrivate(true);
+    try {
+      const next = !isPrivate;
+      await base44.auth.updateMe({ is_private: next });
+      setIsPrivate(next);
+      setUser((u) => ({ ...u, is_private: next }));
+      toast({ title: next ? "Conta privada ativada" : "Conta pública" });
+    } catch (e) {
+      toast({ title: "Erro", variant: "destructive" });
+    }
+    setSavingPrivate(false);
+  };
 
   const copyCode = () => {
     navigator.clipboard?.writeText(playerForm.user_code);
@@ -202,6 +229,34 @@ export default function Profile() {
           </div>
           <Button type="submit" className="rounded-xl w-full" disabled={savingPlayer}>{savingPlayer ? "Salvando..." : "Salvar card"}</Button>
         </form>
+      </section>
+
+      {/* Rede Social */}
+      <section className="bg-card rounded-2xl border border-border p-6 sm:p-8">
+        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
+          <Lock className="w-5 h-5 text-primary" />
+          <h2 className="font-heading font-semibold text-lg">Rede Social</h2>
+        </div>
+
+        <div className="flex gap-8 mb-6">
+          <Link to="/connections?tab=following" className="text-center hover:text-primary">
+            <p className="font-heading font-bold text-2xl">{followingCount}</p>
+            <p className="text-sm text-muted-foreground">Seguindo</p>
+          </Link>
+          <Link to="/connections?tab=followers" className="text-center hover:text-primary">
+            <p className="font-heading font-bold text-2xl">{followersCount}</p>
+            <p className="text-sm text-muted-foreground">Seguidores</p>
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 py-3 border-t border-border">
+          <div>
+            <p className="font-medium flex items-center gap-1.5"><Lock className="w-4 h-4" /> Conta privada</p>
+            <p className="text-sm text-muted-foreground">Quem quiser te seguir precisará de aprovação</p>
+          </div>
+          <Switch checked={isPrivate} onCheckedChange={togglePrivate} disabled={savingPrivate} />
+        </div>
+        <Link to="/follow-requests" className="mt-4 block text-sm font-medium text-primary hover:underline">Ver solicitações de seguir →</Link>
       </section>
 
       {/* Minha Conta */}

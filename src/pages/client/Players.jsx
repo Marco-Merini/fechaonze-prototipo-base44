@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Users, UserPlus, UserCheck } from "lucide-react";
+import { Search, Users, UserPlus, UserCheck, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { computeOverall } from "@/lib/playerStats";
 import PlayerCard from "@/components/players/PlayerCard";
+import { followUser, unfollowUser, cancelRequest } from "@/lib/followActions";
 
 export default function Players() {
   const [me, setMe] = useState(null);
   const [follows, setFollows] = useState([]);
+  const [myRequests, setMyRequests] = useState([]);
   const [team, setTeam] = useState([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
@@ -24,8 +26,12 @@ export default function Players() {
     try {
       const meUser = await base44.auth.me();
       setMe(meUser);
-      const myFollows = await base44.entities.Follow.filter({ follower_id: meUser.id });
+      const [myFollows, reqs] = await Promise.all([
+        base44.entities.Follow.filter({ follower_id: meUser.id }),
+        base44.entities.FollowRequest.filter({ requester_id: meUser.id, status: "pending" }),
+      ]);
       setFollows(myFollows);
+      setMyRequests(reqs);
       const ids = myFollows.map((f) => f.following_id);
       if (ids.length) {
         const res = await base44.functions.invoke("playerSocial", { action: "byIds", ids });
@@ -33,44 +39,93 @@ export default function Players() {
       } else {
         setTeam([]);
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const doSearch = async () => {
     const q = search.trim();
-    if (!q) { setResults([]); setSearched(false); return; }
+    if (!q) {
+      setResults([]);
+      setSearched(false);
+      return;
+    }
     setSearching(true);
     try {
       const res = await base44.functions.invoke("playerSocial", { action: "search", query: q });
       setResults(res.data?.players || []);
       setSearched(true);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     setSearching(false);
   };
 
   const isFollowing = (userId) => follows.some((f) => f.following_id === userId);
+  const isRequested = (userId) => myRequests.some((r) => r.target_id === userId);
 
-  const follow = async (userId) => {
-    setBusyId(userId);
+  const handleFollow = async (p) => {
+    setBusyId(p.id);
     try {
-      await base44.entities.Follow.create({ follower_id: me.id, following_id: userId });
-      toast({ title: "Seguindo!" });
+      const result = await followUser(me, { id: p.id, is_private: p.is_private, full_name: p.full_name });
+      toast({ title: result === "requested" ? "Solicitação enviada" : "Seguindo!" });
       load();
-    } catch (e) { toast({ title: "Erro", variant: "destructive" }); }
+    } catch (e) {
+      toast({ title: "Erro", variant: "destructive" });
+    }
     setBusyId(null);
   };
 
-  const unfollow = async (userId) => {
+  const handleUnfollow = async (userId) => {
     setBusyId(userId);
     try {
-      await base44.entities.Follow.deleteMany({ follower_id: me.id, following_id: userId });
+      await unfollowUser(me, userId);
       toast({ title: "Deixou de seguir" });
       load();
-    } catch (e) { toast({ title: "Erro", variant: "destructive" }); }
+    } catch (e) {
+      toast({ title: "Erro", variant: "destructive" });
+    }
     setBusyId(null);
+  };
+
+  const handleCancel = async (userId) => {
+    setBusyId(userId);
+    try {
+      await cancelRequest(me, userId);
+      toast({ title: "Solicitação cancelada" });
+      load();
+    } catch (e) {
+      toast({ title: "Erro", variant: "destructive" });
+    }
+    setBusyId(null);
+  };
+
+  const renderButton = (p) => {
+    if (isFollowing(p.id)) {
+      return (
+        <Button variant="outline" size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => handleUnfollow(p.id)}>
+          <UserCheck className="w-4 h-4" /> Seguindo
+        </Button>
+      );
+    }
+    if (isRequested(p.id)) {
+      return (
+        <Button variant="outline" size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => handleCancel(p.id)}>
+          <Clock className="w-4 h-4" /> Solicitado
+        </Button>
+      );
+    }
+    return (
+      <Button size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => handleFollow(p)}>
+        <UserPlus className="w-4 h-4" /> {p.is_private ? "Solicitar" : "Seguir"}
+      </Button>
+    );
   };
 
   if (loading) {
@@ -88,7 +143,6 @@ export default function Players() {
         <p className="text-muted-foreground mt-1">Os jogadores que você segue</p>
       </div>
 
-      {/* Buscar amigos */}
       <div className="bg-card rounded-2xl border border-border p-5">
         <h2 className="font-heading font-semibold mb-1">Buscar jogadores</h2>
         <p className="text-sm text-muted-foreground mb-3">Pesquise pelo nome de usuário ou pelo código</p>
@@ -127,15 +181,7 @@ export default function Players() {
                     <p className="text-xs text-muted-foreground">{p.position} • {p.city || "—"} • {computeOverall(p)} OVR</p>
                   </div>
                 </Link>
-                {isFollowing(p.id) ? (
-                  <Button variant="outline" size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => unfollow(p.id)}>
-                    <UserCheck className="w-4 h-4" /> Seguindo
-                  </Button>
-                ) : (
-                  <Button size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => follow(p.id)}>
-                    <UserPlus className="w-4 h-4" /> Seguir
-                  </Button>
-                )}
+                {renderButton(p)}
               </div>
             ))}
           </div>
@@ -145,7 +191,6 @@ export default function Players() {
         )}
       </div>
 
-      {/* Meu Time */}
       <div>
         <h2 className="font-heading font-bold mb-4">Meu Time ({team.length})</h2>
         {team.length === 0 ? (

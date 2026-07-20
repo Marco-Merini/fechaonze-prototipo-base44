@@ -23,6 +23,9 @@ import Profile from '@/pages/client/Profile';
 import MatchFeed from '@/pages/client/MatchFeed';
 import Players from '@/pages/client/Players';
 import PlayerDetail from '@/pages/client/PlayerDetail';
+import Feed from '@/pages/client/Feed';
+import FollowRequests from '@/pages/client/FollowRequests';
+import Connections from '@/pages/client/Connections';
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
@@ -86,6 +89,10 @@ const RoleRouter = () => {
         <Route path="/explore" element={<Explore />} />
         <Route path="/court/:id" element={<CourtDetail />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/follow-requests" element={<FollowRequests />} />
+        <Route path="/connections" element={<Connections />} />
+        <Route path="/connections/:id" element={<Connections />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<Navigate to="/explore" replace />} />

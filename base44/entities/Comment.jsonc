@@ -1,0 +1,32 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID do post"
+    },
+    "author_id": {
+      "type": "string",
+      "description": "ID do autor"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Nome do autor"
+    },
+    "author_photo_url": {
+      "type": "string",
+      "description": "Foto do autor"
+    },
+    "content": {
+      "type": "string",
+      "description": "Texto do coment\u00e1rio"
+    }
+  },
+  "required": [
+    "post_id",
+    "author_id",
+    "author_name",
+    "content"
+  ]
+}

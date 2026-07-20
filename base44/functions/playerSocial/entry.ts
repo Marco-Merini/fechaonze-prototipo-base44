@@ -17,6 +17,7 @@ const publicFields = (u) => ({
   physical: u.physical,
   overall: u.overall,
   ratings_count: u.ratings_count,
+  is_private: u.is_private,
 });
 
 Deno.serve(async (req) => {
@@ -55,7 +56,21 @@ Deno.serve(async (req) => {
     if (body.action === 'getById') {
       const u = await base44.asServiceRole.entities.User.get(body.id).catch(() => null);
       if (!u) return Response.json({ error: 'Not found' }, { status: 404 });
-      return Response.json({ player: publicFields(u) });
+      const [myFollow, myReq, followers, following] = await Promise.all([
+        base44.asServiceRole.entities.Follow.filter({ follower_id: user.id, following_id: body.id }),
+        base44.asServiceRole.entities.FollowRequest.filter({ requester_id: user.id, target_id: body.id, status: 'pending' }),
+        base44.asServiceRole.entities.Follow.filter({ following_id: body.id }),
+        base44.asServiceRole.entities.Follow.filter({ follower_id: body.id }),
+      ]);
+      return Response.json({
+        player: {
+          ...publicFields(u),
+          i_follow: myFollow.length > 0,
+          requested: myReq.length > 0,
+          followers_count: followers.length,
+          following_count: following.length,
+        },
+      });
     }
 
     return Response.json({ error: 'Invalid action' }, { status: 400 });

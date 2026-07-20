@@ -1,0 +1,48 @@
+{
+  "name": "Post",
+  "type": "object",
+  "properties": {
+    "author_id": {
+      "type": "string",
+      "description": "ID do autor"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Nome do autor"
+    },
+    "author_username": {
+      "type": "string",
+      "description": "Username do autor"
+    },
+    "author_photo_url": {
+      "type": "string",
+      "description": "Foto do autor"
+    },
+    "content": {
+      "type": "string",
+      "description": "Texto do post"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL da imagem anexada"
+    },
+    "likes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs de quem curtiu"
+    },
+    "comments_count": {
+      "type": "number",
+      "default": 0,
+      "description": "N\u00famero de coment\u00e1rios"
+    }
+  },
+  "required": [
+    "author_id",
+    "author_name",
+    "content"
+  ]
+}

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, MapPin, UserPlus, UserCheck, Star } from "lucide-react";
+import { ArrowLeft, MapPin, UserPlus, UserCheck, Star, Lock, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import PlayerCard from "@/components/players/PlayerCard";
 import RateAttributes from "@/components/players/RateAttributes";
 import { ATTR_LABELS, tierColor, computeOverall } from "@/lib/playerStats";
+import { followUser, unfollowUser, cancelRequest } from "@/lib/followActions";
 
 export default function PlayerDetail() {
   const { id } = useParams();
   const [player, setPlayer] = useState(null);
   const [me, setMe] = useState(null);
   const [following, setFollowing] = useState(false);
+  const [requested, setRequested] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
@@ -23,29 +25,47 @@ export default function PlayerDetail() {
       const meUser = await base44.auth.me();
       setMe(meUser);
       const res = await base44.functions.invoke("playerSocial", { action: "getById", id });
-      setPlayer(res.data?.player);
-      const myFollows = await base44.entities.Follow.filter({ follower_id: meUser.id, following_id: id });
-      setFollowing(myFollows.length > 0);
-    } catch (e) { console.error(e); }
+      const p = res.data?.player;
+      setPlayer(p);
+      setFollowing(!!p?.i_follow);
+      setRequested(!!p?.requested);
+    } catch (e) {
+      console.error(e);
+    }
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+    load();
+  }, [id]);
 
   const toggleFollow = async () => {
-    if (!me) return;
+    if (!me || !player) return;
     setBusy(true);
     try {
       if (following) {
-        await base44.entities.Follow.deleteMany({ follower_id: me.id, following_id: id });
+        await unfollowUser(me, id);
         setFollowing(false);
         toast({ title: "Deixou de seguir" });
+        load();
+      } else if (requested) {
+        await cancelRequest(me, id);
+        setRequested(false);
+        toast({ title: "Solicitação cancelada" });
       } else {
-        await base44.entities.Follow.create({ follower_id: me.id, following_id: id });
-        setFollowing(true);
-        toast({ title: "Seguindo!" });
+        const result = await followUser(me, { id, is_private: player.is_private, full_name: player.full_name });
+        if (result === "requested") {
+          setRequested(true);
+          toast({ title: "Solicitação enviada" });
+        } else {
+          setFollowing(true);
+          toast({ title: "Seguindo!" });
+          load();
+        }
       }
-    } catch (e) { toast({ title: "Erro", variant: "destructive" }); }
+    } catch (e) {
+      toast({ title: "Erro", variant: "destructive" });
+    }
     setBusy(false);
   };
 
@@ -68,7 +88,6 @@ export default function PlayerDetail() {
 
   const overall = computeOverall(player);
   const tier = tierColor(overall);
-  const name = player.name || player.full_name;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -80,13 +99,20 @@ export default function PlayerDetail() {
         <PlayerCard player={player} size="lg" />
         <div className="flex-1 space-y-3">
           <div>
-            <h1 className="text-2xl font-heading font-bold uppercase">{name}</h1>
+            <h1 className="text-2xl font-heading font-bold uppercase flex items-center gap-2">
+              {player.full_name}
+              {player.is_private && <Lock className="w-4 h-4 text-muted-foreground" />}
+            </h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
               <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${tier.text} bg-gradient-to-r ${tier.bg}`}>{tier.label}</span>
               <MapPin className="w-4 h-4" /> {player.city || "—"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">@{player.username} • código: <span className="font-mono">{player.user_code}</span></p>
-            <p className="text-sm text-muted-foreground">{player.ratings_count || 0} avaliação(ões)</p>
+            <p className="text-sm text-muted-foreground mt-1">{player.ratings_count || 0} avaliação(ões)</p>
+            <div className="flex gap-4 mt-2 text-sm">
+              <Link to={`/connections/${player.id}?tab=followers`} className="hover:text-primary"><b>{player.followers_count || 0}</b> seguidores</Link>
+              <Link to={`/connections/${player.id}?tab=following`} className="hover:text-primary"><b>{player.following_count || 0}</b> seguindo</Link>
+            </div>
           </div>
           {me && me.id !== id && (
             <div className="flex gap-2">
@@ -94,9 +120,13 @@ export default function PlayerDetail() {
                 <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
                   <UserCheck className="w-4 h-4" /> Seguindo
                 </Button>
+              ) : requested ? (
+                <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
+                  <Clock className="w-4 h-4" /> Solicitado
+                </Button>
               ) : (
                 <Button className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
-                  <UserPlus className="w-4 h-4" /> Seguir
+                  <UserPlus className="w-4 h-4" /> {player.is_private ? "Solicitar seguir" : "Seguir"}
                 </Button>
               )}
               <Button variant="secondary" className="rounded-xl gap-2" onClick={() => setRateOpen(true)}>
