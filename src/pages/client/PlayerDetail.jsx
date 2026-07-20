@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, MapPin, UserPlus, UserCheck, Star, Lock, Clock } from "lucide-react";
+import { ArrowLeft, MapPin, UserPlus, UserCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import PlayerCard from "@/components/players/PlayerCard";
 import RateAttributes from "@/components/players/RateAttributes";
 import { ATTR_LABELS, tierColor, computeOverall } from "@/lib/playerStats";
 import { isFootballUser } from "@/lib/sports";
-import { followUser, unfollowUser, cancelRequest } from "@/lib/followActions";
+import { followUser, unfollowUser } from "@/lib/followActions";
 
 export default function PlayerDetail() {
   const { id } = useParams();
   const [player, setPlayer] = useState(null);
   const [me, setMe] = useState(null);
   const [following, setFollowing] = useState(false);
-  const [requested, setRequested] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
@@ -29,7 +28,6 @@ export default function PlayerDetail() {
       const p = res.data?.player;
       setPlayer(p);
       setFollowing(!!p?.i_follow);
-      setRequested(!!p?.requested);
     } catch (e) {
       console.error(e);
     }
@@ -49,20 +47,11 @@ export default function PlayerDetail() {
         setFollowing(false);
         toast({ title: "Deixou de seguir" });
         load();
-      } else if (requested) {
-        await cancelRequest(me, id);
-        setRequested(false);
-        toast({ title: "Solicitação cancelada" });
       } else {
-        const result = await followUser(me, { id, is_private: player.is_private, full_name: player.full_name });
-        if (result === "requested") {
-          setRequested(true);
-          toast({ title: "Solicitação enviada" });
-        } else {
-          setFollowing(true);
-          toast({ title: "Seguindo!" });
-          load();
-        }
+        await followUser(me, { id });
+        setFollowing(true);
+        toast({ title: "Seguindo!" });
+        load();
       }
     } catch (e) {
       toast({ title: "Erro", variant: "destructive" });
@@ -103,7 +92,6 @@ export default function PlayerDetail() {
           <div>
             <h1 className="text-2xl font-heading font-bold uppercase flex items-center gap-2">
               {player.full_name}
-              {player.is_private && <Lock className="w-4 h-4 text-muted-foreground" />}
             </h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
               {hasFootball && <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${tier.text} bg-gradient-to-r ${tier.bg}`}>{tier.label}</span>}
@@ -122,13 +110,9 @@ export default function PlayerDetail() {
                 <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
                   <UserCheck className="w-4 h-4" /> Seguindo
                 </Button>
-              ) : requested ? (
-                <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
-                  <Clock className="w-4 h-4" /> Solicitado
-                </Button>
               ) : (
                 <Button className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
-                  <UserPlus className="w-4 h-4" /> {player.is_private ? "Solicitar seguir" : "Seguir"}
+                  <UserPlus className="w-4 h-4" /> Seguir
                 </Button>
               )}
               {hasFootball && (

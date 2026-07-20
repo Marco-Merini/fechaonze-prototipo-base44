@@ -85,11 +85,6 @@
       "default": 0,
       "description": "N\u00famero de avalia\u00e7\u00f5es recebidas"
     },
-    "is_private": {
-      "type": "boolean",
-      "default": false,
-      "description": "Se a conta \u00e9 privada"
-    },
     "sports": {
       "type": "array",
       "items": {

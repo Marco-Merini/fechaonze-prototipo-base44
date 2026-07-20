@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { computeOverall, tierColor, ATTR_LABELS, POSITIONS } from "@/lib/playerStats";
@@ -20,8 +19,6 @@ export default function Profile() {
   const [dark, setDark] = useState(false);
   const [playerForm, setPlayerForm] = useState({ username: "", user_code: "", sports: [], positions: [] });
   const [savingPlayer, setSavingPlayer] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [savingPrivate, setSavingPrivate] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const { toast } = useToast();
@@ -41,7 +38,6 @@ export default function Profile() {
           sports: me.sports || [],
           positions: me.positions || [],
         });
-        setIsPrivate(!!me.is_private);
         const [fol, ing] = await Promise.all([
           base44.entities.Follow.filter({ following_id: me.id }),
           base44.entities.Follow.filter({ follower_id: me.id }),
@@ -70,20 +66,6 @@ export default function Profile() {
   const tier = tierColor(overall);
   const ratingsCount = user?.ratings_count || 0;
   const hasFootball = isFootballUser(user?.sports);
-
-  const togglePrivate = async () => {
-    setSavingPrivate(true);
-    try {
-      const next = !isPrivate;
-      await base44.auth.updateMe({ is_private: next });
-      setIsPrivate(next);
-      setUser((u) => ({ ...u, is_private: next }));
-      toast({ title: next ? "Conta privada ativada" : "Conta pública" });
-    } catch (e) {
-      toast({ title: "Erro", variant: "destructive" });
-    }
-    setSavingPrivate(false);
-  };
 
   const copyCode = () => {
     navigator.clipboard?.writeText(playerForm.user_code);
@@ -266,14 +248,7 @@ export default function Profile() {
           </Link>
         </div>
 
-        <div className="flex items-center justify-between gap-4 py-3 border-t border-border">
-          <div>
-            <p className="font-medium flex items-center gap-1.5"><Lock className="w-4 h-4" /> Conta privada</p>
-            <p className="text-sm text-muted-foreground">Quem quiser te seguir precisará de aprovação</p>
-          </div>
-          <Switch checked={isPrivate} onCheckedChange={togglePrivate} disabled={savingPrivate} />
-        </div>
-        <Link to="/follow-requests" className="mt-4 block text-sm font-medium text-primary hover:underline">Ver solicitações de seguir →</Link>
+        <Link to="/follow-requests" className="mt-4 block text-sm font-medium text-primary hover:underline">Ver seguidores →</Link>
       </section>
 
       {/* Minha Conta */}

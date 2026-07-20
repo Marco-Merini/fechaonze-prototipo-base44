@@ -18,7 +18,7 @@ const clientLinks = [
   { label: "Meus Agendamentos", path: "/my-bookings", icon: CalendarCheck },
   { label: "Meu time", path: "/players", icon: Star },
   { label: "Fecha Onze", path: "/matches", icon: Users },
-  { label: "Solicitações", path: "/follow-requests", icon: UserPlus },
+  { label: "Seguidores", path: "/follow-requests", icon: UserPlus },
 ];
 
 export default function Sidebar({ userRole }) {

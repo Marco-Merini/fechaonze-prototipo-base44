@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Users, UserPlus, UserCheck, Clock } from "lucide-react";
+import { Search, Users, UserPlus, UserCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { computeOverall } from "@/lib/playerStats";
 import PlayerCard from "@/components/players/PlayerCard";
-import { followUser, unfollowUser, cancelRequest } from "@/lib/followActions";
+import { followUser, unfollowUser } from "@/lib/followActions";
 
 export default function Players() {
   const [me, setMe] = useState(null);
   const [follows, setFollows] = useState([]);
-  const [myRequests, setMyRequests] = useState([]);
   const [team, setTeam] = useState([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
@@ -26,12 +25,8 @@ export default function Players() {
     try {
       const meUser = await base44.auth.me();
       setMe(meUser);
-      const [myFollows, reqs] = await Promise.all([
-        base44.entities.Follow.filter({ follower_id: meUser.id }),
-        base44.entities.FollowRequest.filter({ requester_id: meUser.id, status: "pending" }),
-      ]);
+      const myFollows = await base44.entities.Follow.filter({ follower_id: meUser.id });
       setFollows(myFollows);
-      setMyRequests(reqs);
       const ids = myFollows.map((f) => f.following_id);
       if (ids.length) {
         const res = await base44.functions.invoke("playerSocial", { action: "byIds", ids });
@@ -68,13 +63,12 @@ export default function Players() {
   };
 
   const isFollowing = (userId) => follows.some((f) => f.following_id === userId);
-  const isRequested = (userId) => myRequests.some((r) => r.target_id === userId);
 
   const handleFollow = async (p) => {
     setBusyId(p.id);
     try {
-      const result = await followUser(me, { id: p.id, is_private: p.is_private, full_name: p.full_name });
-      toast({ title: result === "requested" ? "Solicitação enviada" : "Seguindo!" });
+      await followUser(me, { id: p.id });
+      toast({ title: "Seguindo!" });
       load();
     } catch (e) {
       toast({ title: "Erro", variant: "destructive" });
@@ -94,18 +88,6 @@ export default function Players() {
     setBusyId(null);
   };
 
-  const handleCancel = async (userId) => {
-    setBusyId(userId);
-    try {
-      await cancelRequest(me, userId);
-      toast({ title: "Solicitação cancelada" });
-      load();
-    } catch (e) {
-      toast({ title: "Erro", variant: "destructive" });
-    }
-    setBusyId(null);
-  };
-
   const renderButton = (p) => {
     if (isFollowing(p.id)) {
       return (
@@ -114,16 +96,9 @@ export default function Players() {
         </Button>
       );
     }
-    if (isRequested(p.id)) {
-      return (
-        <Button variant="outline" size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => handleCancel(p.id)}>
-          <Clock className="w-4 h-4" /> Solicitado
-        </Button>
-      );
-    }
     return (
       <Button size="sm" className="rounded-xl gap-1.5" disabled={busyId === p.id} onClick={() => handleFollow(p)}>
-        <UserPlus className="w-4 h-4" /> {p.is_private ? "Solicitar" : "Seguir"}
+        <UserPlus className="w-4 h-4" /> Seguir
       </Button>
     );
   };
