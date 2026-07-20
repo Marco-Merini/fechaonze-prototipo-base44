@@ -43,7 +43,7 @@
         "ATA"
       ],
       "default": "ATA",
-      "description": "Posi\u00e7\u00e3o do jogador"
+      "description": "Posi\u00e7\u00e3o principal (modalidade de futebol)"
     },
     "pace": {
       "type": "number",
@@ -88,7 +88,31 @@
     "is_private": {
       "type": "boolean",
       "default": false,
-      "description": "Se a conta \u00e9 privada (exige aprova\u00e7\u00e3o de seguidores)"
+      "description": "Se a conta \u00e9 privada"
+    },
+    "sports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Modalidades que o usu\u00e1rio joga"
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sport": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Posi\u00e7\u00e3o por modalidade de futebol"
     }
   }
 }

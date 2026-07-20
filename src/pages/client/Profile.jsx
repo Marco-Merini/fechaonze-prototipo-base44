@@ -9,6 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import { computeOverall, tierColor, ATTR_LABELS, POSITIONS } from "@/lib/playerStats";
+import { isFootballUser, isFootballSport } from "@/lib/sports";
+import SportSelector from "@/components/SportSelector";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -16,7 +18,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dark, setDark] = useState(false);
-  const [playerForm, setPlayerForm] = useState({ username: "", user_code: "", position: "ATA" });
+  const [playerForm, setPlayerForm] = useState({ username: "", user_code: "", sports: [], positions: [] });
   const [savingPlayer, setSavingPlayer] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [savingPrivate, setSavingPrivate] = useState(false);
@@ -36,7 +38,8 @@ export default function Profile() {
         setPlayerForm({
           username: me.username || "",
           user_code: me.user_code || genCode(),
-          position: me.position || "ATA",
+          sports: me.sports || [],
+          positions: me.positions || [],
         });
         setIsPrivate(!!me.is_private);
         const [fol, ing] = await Promise.all([
@@ -66,6 +69,7 @@ export default function Profile() {
   const overall = user ? (user.overall ?? computeOverall(user)) : 0;
   const tier = tierColor(overall);
   const ratingsCount = user?.ratings_count || 0;
+  const hasFootball = isFootballUser(user?.sports);
 
   const togglePrivate = async () => {
     setSavingPrivate(true);
@@ -103,18 +107,23 @@ export default function Profile() {
         setSavingPlayer(false);
         return;
       }
-      const newOverall = computeOverall({
-        position: playerForm.position,
-        pace: user?.pace, shooting: user?.shooting, passing: user?.passing,
-        dribbling: user?.dribbling, defending: user?.defending, physical: user?.physical,
-      });
+      const primaryPosition = playerForm.positions.find((p) => isFootballSport(p.sport))?.position || user?.position || "ATA";
+      const newOverall = hasFootball
+        ? computeOverall({
+            position: primaryPosition,
+            pace: user?.pace, shooting: user?.shooting, passing: user?.passing,
+            dribbling: user?.dribbling, defending: user?.defending, physical: user?.physical,
+          })
+        : 0;
       await base44.auth.updateMe({
         username: playerForm.username.trim(),
         user_code: playerForm.user_code,
-        position: playerForm.position,
+        sports: playerForm.sports,
+        positions: playerForm.positions,
+        position: primaryPosition,
         overall: newOverall,
       });
-      setUser((u) => ({ ...u, position: playerForm.position, overall: newOverall }));
+      setUser((u) => ({ ...u, sports: playerForm.sports, positions: playerForm.positions, position: primaryPosition, overall: newOverall }));
       toast({ title: "Card atualizado!" });
     } catch (e) {
       toast({ title: "Erro", description: e.message, variant: "destructive" });
@@ -189,20 +198,27 @@ export default function Profile() {
           <h2 className="font-heading font-semibold text-lg">Meu Card</h2>
         </div>
 
-        <div className="flex items-center gap-5 mb-4">
-          <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${tier.bg} flex items-center justify-center shrink-0`}>
-            <span className={`text-4xl font-extrabold ${tier.text}`}>{ratingsCount > 0 ? overall : "—"}</span>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Seu Overall</p>
-            <p className="font-heading font-bold text-lg">{ratingsCount > 0 ? tier.label : "Sem avaliações"}</p>
-            <p className="text-sm text-muted-foreground">{ratingsCount} avaliação(ões)</p>
-          </div>
-        </div>
-
-        <p className="text-sm text-muted-foreground mb-6">
-          Seu overall é calculado a partir das avaliações que os outros jogadores dão nos seus atributos. Você não pode editar seus próprios atributos.
-        </p>
+        {hasFootball ? (
+          <>
+            <div className="flex items-center gap-5 mb-4">
+              <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${tier.bg} flex items-center justify-center shrink-0`}>
+                <span className={`text-4xl font-extrabold ${tier.text}`}>{ratingsCount > 0 ? overall : "—"}</span>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Seu Overall</p>
+                <p className="font-heading font-bold text-lg">{ratingsCount > 0 ? tier.label : "Sem avaliações"}</p>
+                <p className="text-sm text-muted-foreground">{ratingsCount} avaliação(ões)</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              Seu overall é calculado a partir das avaliações que os outros jogadores dão nos seus atributos. Você não pode editar seus próprios atributos.
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground mb-6">
+            Você não joga modalidades de futebol, então as informações de overall não se aplicam ao seu perfil.
+          </p>
+        )}
 
         <form onSubmit={handleSavePlayer} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -219,13 +235,14 @@ export default function Profile() {
             </div>
           </div>
           <div>
-            <Label>Posição</Label>
-            <Select value={playerForm.position} onValueChange={(v) => setPlayerForm((f) => ({ ...f, position: v }))}>
-              <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {POSITIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Label>Modalidades e posições</Label>
+            <div className="mt-1">
+              <SportSelector
+                sports={playerForm.sports}
+                positions={playerForm.positions}
+                onChange={({ sports, positions }) => setPlayerForm((f) => ({ ...f, sports, positions }))}
+              />
+            </div>
           </div>
           <Button type="submit" className="rounded-xl w-full" disabled={savingPlayer}>{savingPlayer ? "Salvando..." : "Salvar card"}</Button>
         </form>

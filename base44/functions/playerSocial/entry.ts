@@ -18,6 +18,8 @@ const publicFields = (u) => ({
   overall: u.overall,
   ratings_count: u.ratings_count,
   is_private: u.is_private,
+  sports: u.sports,
+  positions: u.positions,
 });
 
 Deno.serve(async (req) => {

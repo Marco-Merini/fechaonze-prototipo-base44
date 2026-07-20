@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import PlayerCard from "@/components/players/PlayerCard";
 import RateAttributes from "@/components/players/RateAttributes";
 import { ATTR_LABELS, tierColor, computeOverall } from "@/lib/playerStats";
+import { isFootballUser } from "@/lib/sports";
 import { followUser, unfollowUser, cancelRequest } from "@/lib/followActions";
 
 export default function PlayerDetail() {
@@ -88,6 +89,7 @@ export default function PlayerDetail() {
 
   const overall = computeOverall(player);
   const tier = tierColor(overall);
+  const hasFootball = isFootballUser(player.sports);
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -104,7 +106,7 @@ export default function PlayerDetail() {
               {player.is_private && <Lock className="w-4 h-4 text-muted-foreground" />}
             </h1>
             <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">
-              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${tier.text} bg-gradient-to-r ${tier.bg}`}>{tier.label}</span>
+              {hasFootball && <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${tier.text} bg-gradient-to-r ${tier.bg}`}>{tier.label}</span>}
               <MapPin className="w-4 h-4" /> {player.city || "—"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">@{player.username} • código: <span className="font-mono">{player.user_code}</span></p>
@@ -129,31 +131,35 @@ export default function PlayerDetail() {
                   <UserPlus className="w-4 h-4" /> {player.is_private ? "Solicitar seguir" : "Seguir"}
                 </Button>
               )}
-              <Button variant="secondary" className="rounded-xl gap-2" onClick={() => setRateOpen(true)}>
-                <Star className="w-4 h-4" /> Avaliar
-              </Button>
+              {hasFootball && (
+                <Button variant="secondary" className="rounded-xl gap-2" onClick={() => setRateOpen(true)}>
+                  <Star className="w-4 h-4" /> Avaliar
+                </Button>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-5">
-        <h3 className="font-heading font-bold mb-3">Atributos</h3>
-        <div className="space-y-2">
-          {ATTR_LABELS.map((a) => {
-            const val = player[a.key] ?? 0;
-            return (
-              <div key={a.key} className="flex items-center gap-3">
-                <span className="text-sm font-medium w-28">{a.label}</span>
-                <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: `${val}%` }} />
+      {hasFootball && (
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <h3 className="font-heading font-bold mb-3">Atributos</h3>
+          <div className="space-y-2">
+            {ATTR_LABELS.map((a) => {
+              const val = player[a.key] ?? 0;
+              return (
+                <div key={a.key} className="flex items-center gap-3">
+                  <span className="text-sm font-medium w-28">{a.label}</span>
+                  <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full" style={{ width: `${val}%` }} />
+                  </div>
+                  <span className="text-sm font-bold w-8 text-right">{val}</span>
                 </div>
-                <span className="text-sm font-bold w-8 text-right">{val}</span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <RateAttributes open={rateOpen} onOpenChange={setRateOpen} player={player} onRated={load} />
     </div>

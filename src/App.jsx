@@ -26,6 +26,7 @@ import PlayerDetail from '@/pages/client/PlayerDetail';
 import Feed from '@/pages/client/Feed';
 import FollowRequests from '@/pages/client/FollowRequests';
 import Connections from '@/pages/client/Connections';
+import Onboarding from '@/pages/Onboarding';
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
@@ -75,6 +76,15 @@ const RoleRouter = () => {
           <Route path="/profile" element={<Profile />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
+
+  if (!user?.sports || user.sports.length === 0) {
+    return (
+      <Routes>
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
   }

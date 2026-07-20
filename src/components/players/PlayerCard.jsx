@@ -1,12 +1,34 @@
 import React from "react";
 import { User } from "lucide-react";
 import { computeOverall, tierColor, ATTR_LABELS } from "@/lib/playerStats";
+import { isFootballUser, sportLabel } from "@/lib/sports";
 
 export default function PlayerCard({ player, onClick, size = "md" }) {
+  const name = player.name || player.full_name;
+  const dims = size === "lg" ? "w-64" : "w-52";
+
+  if (!isFootballUser(player.sports)) {
+    return (
+      <div onClick={onClick} className={`${dims} cursor-pointer rounded-2xl bg-card border border-border p-5 text-center shadow-md transition-transform hover:scale-[1.03]`}>
+        <div className="w-16 h-16 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center mx-auto">
+          {player.photo_url ? (
+            <img src={player.photo_url} alt={name} className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-8 h-8 text-primary/60" />
+          )}
+        </div>
+        <h3 className="font-heading font-bold text-lg mt-2 truncate uppercase tracking-wide">{name}</h3>
+        <div className="flex flex-wrap justify-center gap-1 mt-2">
+          {(player.sports || []).map((s) => (
+            <span key={s} className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{sportLabel(s)}</span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const overall = computeOverall(player);
   const tier = tierColor(overall);
-  const dims = size === "lg" ? "w-64" : "w-52";
-  const name = player.name || player.full_name;
 
   return (
     <div
