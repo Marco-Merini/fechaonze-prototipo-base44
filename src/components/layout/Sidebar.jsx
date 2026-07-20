@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, Settings, LogOut, Menu, X, Users, Star, Newspaper, UserPlus } from "lucide-react";
+import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, Settings, LogOut, Menu, X, Users, Star, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 // ThemeToggle movido para a página de Configurações
@@ -14,7 +14,6 @@ const adminLinks = [
 ];
 
 const clientLinks = [
-  { label: "Feed", path: "/feed", icon: Newspaper },
   { label: "Buscar Quadras", path: "/explore", icon: Search },
   { label: "Meus Agendamentos", path: "/my-bookings", icon: CalendarCheck },
   { label: "Meu time", path: "/players", icon: Star },
