@@ -70,6 +70,7 @@ export default function Profile() {
   const tier = tierColor(overall);
   const ratingsCount = user?.ratings_count || 0;
   const hasFootball = isFootballUser(user);
+  const isGestor = user?.account_type === "dono";
 
   const copyCode = () => {
     navigator.clipboard?.writeText(playerForm.user_code);
@@ -195,6 +196,7 @@ export default function Profile() {
       </section>
 
       {/* Meu Card de Jogador */}
+      {!isGestor && (
       <section className="bg-card rounded-2xl border border-border p-6 sm:p-8">
         <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
           <Hash className="w-5 h-5 text-primary" />
@@ -250,8 +252,10 @@ export default function Profile() {
           <Button type="submit" className="rounded-xl w-full" disabled={savingPlayer}>{savingPlayer ? "Salvando..." : "Salvar card"}</Button>
         </form>
       </section>
+      )}
 
       {/* Rede Social */}
+      {!isGestor && (
       <section className="bg-card rounded-2xl border border-border p-6 sm:p-8">
         <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
           <Lock className="w-5 h-5 text-primary" />
@@ -271,6 +275,7 @@ export default function Profile() {
 
         <Link to="/follow-requests" className="mt-4 block text-sm font-medium text-primary hover:underline">Ver seguidores →</Link>
       </section>
+      )}
 
       {/* Minha Conta */}
       <section className="bg-card rounded-2xl border border-border p-6 sm:p-8">
