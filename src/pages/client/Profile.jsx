@@ -14,10 +14,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dark, setDark] = useState(false);
-  const [playerForm, setPlayerForm] = useState({
-    username: "", user_code: "", position: "ATA",
-    pace: 70, shooting: 70, passing: 70, dribbling: 70, defending: 70, physical: 70,
-  });
+  const [playerForm, setPlayerForm] = useState({ username: "", user_code: "", position: "ATA" });
   const [savingPlayer, setSavingPlayer] = useState(false);
   const { toast } = useToast();
 
@@ -34,8 +31,6 @@ export default function Profile() {
           username: me.username || "",
           user_code: me.user_code || genCode(),
           position: me.position || "ATA",
-          pace: me.pace ?? 70, shooting: me.shooting ?? 70, passing: me.passing ?? 70,
-          dribbling: me.dribbling ?? 70, defending: me.defending ?? 70, physical: me.physical ?? 70,
         });
       } catch (e) { console.error(e); }
       setLoading(false);
@@ -55,8 +50,9 @@ export default function Profile() {
     }
   };
 
-  const overall = computeOverall(playerForm);
+  const overall = user ? (user.overall ?? computeOverall(user)) : 0;
   const tier = tierColor(overall);
+  const ratingsCount = user?.ratings_count || 0;
 
   const copyCode = () => {
     navigator.clipboard?.writeText(playerForm.user_code);
@@ -80,13 +76,18 @@ export default function Profile() {
         setSavingPlayer(false);
         return;
       }
+      const newOverall = computeOverall({
+        position: playerForm.position,
+        pace: user?.pace, shooting: user?.shooting, passing: user?.passing,
+        dribbling: user?.dribbling, defending: user?.defending, physical: user?.physical,
+      });
       await base44.auth.updateMe({
         username: playerForm.username.trim(),
         user_code: playerForm.user_code,
         position: playerForm.position,
-        pace: playerForm.pace, shooting: playerForm.shooting, passing: playerForm.passing,
-        dribbling: playerForm.dribbling, defending: playerForm.defending, physical: playerForm.physical,
+        overall: newOverall,
       });
+      setUser((u) => ({ ...u, position: playerForm.position, overall: newOverall }));
       toast({ title: "Card atualizado!" });
     } catch (e) {
       toast({ title: "Erro", description: e.message, variant: "destructive" });
@@ -161,16 +162,20 @@ export default function Profile() {
           <h2 className="font-heading font-semibold text-lg">Meu Card</h2>
         </div>
 
-        <div className="flex items-center gap-5 mb-6">
-          <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${tier.bg} flex items-center justify-center shrink-0`}>
-            <span className={`text-3xl font-extrabold ${tier.text}`}>{overall}</span>
+        <div className="flex items-center gap-5 mb-4">
+          <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${tier.bg} flex items-center justify-center shrink-0`}>
+            <span className={`text-4xl font-extrabold ${tier.text}`}>{ratingsCount > 0 ? overall : "—"}</span>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Seu Overall</p>
-            <p className="font-heading font-bold text-xl">{tier.label}</p>
-            <p className="text-sm text-muted-foreground">Posição: {playerForm.position}</p>
+            <p className="font-heading font-bold text-lg">{ratingsCount > 0 ? tier.label : "Sem avaliações"}</p>
+            <p className="text-sm text-muted-foreground">{ratingsCount} avaliação(ões)</p>
           </div>
         </div>
+
+        <p className="text-sm text-muted-foreground mb-6">
+          Seu overall é calculado a partir das avaliações que os outros jogadores dão nos seus atributos. Você não pode editar seus próprios atributos.
+        </p>
 
         <form onSubmit={handleSavePlayer} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -194,20 +199,6 @@ export default function Profile() {
                 {POSITIONS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
               </SelectContent>
             </Select>
-          </div>
-          <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="mb-0">Atributos (0-99)</Label>
-              <span className="text-sm font-bold text-primary">OVER {overall}</span>
-            </div>
-            {ATTR_LABELS.map((a) => (
-              <div key={a.key} className="flex items-center gap-3">
-                <span className="text-sm font-medium w-24">{a.label}</span>
-                <input type="range" min={0} max={99} value={playerForm[a.key]} onChange={(e) => setPlayerForm((f) => ({ ...f, [a.key]: Number(e.target.value) }))} className="flex-1 accent-primary" />
-                <span className="text-sm font-bold w-8 text-right">{playerForm[a.key]}</span>
-              </div>
-            ))}
-            <p className="text-xs text-muted-foreground">O Overall é calculado por média ponderada conforme a posição do jogador.</p>
           </div>
           <Button type="submit" className="rounded-xl w-full" disabled={savingPlayer}>{savingPlayer ? "Salvando..." : "Salvar card"}</Button>
         </form>

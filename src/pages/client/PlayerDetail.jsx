@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, MapPin, UserPlus, UserCheck } from "lucide-react";
+import { ArrowLeft, MapPin, UserPlus, UserCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import PlayerCard from "@/components/players/PlayerCard";
+import RateAttributes from "@/components/players/RateAttributes";
 import { ATTR_LABELS, tierColor, computeOverall } from "@/lib/playerStats";
 
 export default function PlayerDetail() {
@@ -14,6 +15,7 @@ export default function PlayerDetail() {
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [rateOpen, setRateOpen] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -84,17 +86,23 @@ export default function PlayerDetail() {
               <MapPin className="w-4 h-4" /> {player.city || "—"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">@{player.username} • código: <span className="font-mono">{player.user_code}</span></p>
+            <p className="text-sm text-muted-foreground">{player.ratings_count || 0} avaliação(ões)</p>
           </div>
           {me && me.id !== id && (
-            following ? (
-              <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
-                <UserCheck className="w-4 h-4" /> Seguindo
+            <div className="flex gap-2">
+              {following ? (
+                <Button variant="outline" className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
+                  <UserCheck className="w-4 h-4" /> Seguindo
+                </Button>
+              ) : (
+                <Button className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
+                  <UserPlus className="w-4 h-4" /> Seguir
+                </Button>
+              )}
+              <Button variant="secondary" className="rounded-xl gap-2" onClick={() => setRateOpen(true)}>
+                <Star className="w-4 h-4" /> Avaliar
               </Button>
-            ) : (
-              <Button className="rounded-xl gap-2" disabled={busy} onClick={toggleFollow}>
-                <UserPlus className="w-4 h-4" /> Seguir
-              </Button>
-            )
+            </div>
           )}
         </div>
       </div>
@@ -116,6 +124,8 @@ export default function PlayerDetail() {
           })}
         </div>
       </div>
+
+      <RateAttributes open={rateOpen} onOpenChange={setRateOpen} player={player} onRated={load} />
     </div>
   );
 }

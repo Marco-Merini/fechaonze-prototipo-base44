@@ -15,6 +15,8 @@ const publicFields = (u) => ({
   dribbling: u.dribbling,
   defending: u.defending,
   physical: u.physical,
+  overall: u.overall,
+  ratings_count: u.ratings_count,
 });
 
 Deno.serve(async (req) => {
