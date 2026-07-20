@@ -78,7 +78,7 @@ export default function PlayerDetail() {
 
   const overall = computeOverall(player);
   const tier = tierColor(overall);
-  const hasFootball = isFootballUser(player.sports);
+  const hasFootball = isFootballUser(player);
 
   return (
     <div className="space-y-6 max-w-3xl">

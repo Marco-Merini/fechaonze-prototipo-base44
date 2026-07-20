@@ -10,5 +10,9 @@ export const SPORTS = [
 ];
 
 export const isFootballSport = (id) => SPORTS.find((s) => s.id === id)?.football || false;
-export const isFootballUser = (sports) => (sports || []).some((sid) => isFootballSport(sid));
+export const isFootballUser = (player) => {
+  const sports = player?.sports;
+  if (sports && sports.length) return sports.some((sid) => isFootballSport(sid));
+  return (player?.ratings_count || 0) > 0;
+};
 export const sportLabel = (id) => SPORTS.find((s) => s.id === id)?.label || id;

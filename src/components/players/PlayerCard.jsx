@@ -7,7 +7,7 @@ export default function PlayerCard({ player, onClick, size = "md" }) {
   const name = player.name || player.full_name;
   const dims = size === "lg" ? "w-64" : "w-52";
 
-  if (!isFootballUser(player.sports)) {
+  if (!isFootballUser(player)) {
     return (
       <div onClick={onClick} className={`${dims} cursor-pointer rounded-2xl bg-card border border-border p-5 text-center shadow-md transition-transform hover:scale-[1.03]`}>
         <div className="w-16 h-16 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center mx-auto">

@@ -65,7 +65,7 @@ export default function Profile() {
   const overall = user ? (user.overall ?? computeOverall(user)) : 0;
   const tier = tierColor(overall);
   const ratingsCount = user?.ratings_count || 0;
-  const hasFootball = isFootballUser(user?.sports);
+  const hasFootball = isFootballUser(user);
 
   const copyCode = () => {
     navigator.clipboard?.writeText(playerForm.user_code);
