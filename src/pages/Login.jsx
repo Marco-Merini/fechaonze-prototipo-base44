@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
+import { LogIn, Mail, Lock, Loader2, UserPlus } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 
@@ -38,12 +38,11 @@ export default function Login() {
       title="Bem-vindo de volta"
       subtitle="Acesse sua conta"
       footer={
-        <>
-          Não tem conta?{" "}
-          <Link to="/register" className="text-primary font-medium hover:underline">
-            Criar conta
-          </Link>
-        </>
+        <Link to="/register" className="block">
+          <Button variant="outline" className="w-full h-14 rounded-xl text-base font-semibold gap-2">
+            <UserPlus className="w-5 h-5" /> Criar conta
+          </Button>
+        </Link>
       }
     >
       <Button
