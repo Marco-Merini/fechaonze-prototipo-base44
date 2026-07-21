@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, MapPin, Clock, LocateFixed, Navigation } from "lucide-react";
+import { Search, MapPin, Clock, LocateFixed, Navigation, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -19,17 +20,26 @@ function haversineKm(lat1, lon1, lat2, lon2) {
 
 export default function Explore() {
   const [courts, setCourts] = useState([]);
+  const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchName, setSearchName] = useState("");
   const [searchCity, setSearchCity] = useState("");
   const [userLoc, setUserLoc] = useState(null);
   const [locating, setLocating] = useState(false);
   const [radius, setRadius] = useState("10");
+  const [priceFilter, setPriceFilter] = useState("any");
+  const [timeFilter, setTimeFilter] = useState("any");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await base44.entities.Court.filter({ is_active: true });
+        const [data, allSlots] = await Promise.all([
+          base44.entities.Court.filter({ is_active: true }),
+          base44.entities.TimeSlot.filter({ is_available: true }),
+        ]);
         setCourts(data);
+        setSlots(allSlots);
       } catch (e) { console.error(e); }
       setLoading(false);
     };
@@ -46,9 +56,22 @@ export default function Explore() {
     );
   };
 
+  const distinctTimes = Array.from(new Set(slots.map((s) => s.start_time))).sort((a, b) => a.localeCompare(b));
+
   let filtered = courts;
+  if (searchName) {
+    filtered = filtered.filter((c) => c.name.toLowerCase().includes(searchName.toLowerCase()));
+  }
   if (searchCity) {
     filtered = filtered.filter((c) => c.city.toLowerCase().includes(searchCity.toLowerCase()));
+  }
+  if (priceFilter !== "any") {
+    const max = Number(priceFilter);
+    filtered = filtered.filter((c) => (c.price_per_hour ?? 0) <= max);
+  }
+  if (timeFilter !== "any") {
+    const courtIdsWithTime = new Set(slots.filter((s) => s.start_time === timeFilter).map((s) => s.court_id));
+    filtered = filtered.filter((c) => courtIdsWithTime.has(c.id));
   }
   if (userLoc) {
     const r = Number(radius);
@@ -80,12 +103,28 @@ export default function Explore() {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
+            placeholder="Buscar por nome da quadra..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            className="pl-10 rounded-xl h-12 text-base"
+          />
+        </div>
+        <div className="relative flex-1 min-w-48">
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
             placeholder="Buscar por cidade..."
             value={searchCity}
             onChange={(e) => setSearchCity(e.target.value)}
             className="pl-10 rounded-xl h-12 text-base"
           />
         </div>
+        <Button
+          variant={showFilters ? "default" : "outline"}
+          onClick={() => setShowFilters((v) => !v)}
+          className="rounded-xl h-12 gap-2"
+        >
+          <Filter className="w-4 h-4" /> Filtros
+        </Button>
         <Button
           variant={userLoc ? "default" : "outline"}
           onClick={handleLocate}
@@ -107,6 +146,36 @@ export default function Explore() {
           </Select>
         )}
       </div>
+
+      {showFilters && (
+        <div className="bg-card rounded-2xl border border-border p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label className="mb-2 block">Preço máximo por hora</Label>
+            <Select value={priceFilter} onValueChange={setPriceFilter}>
+              <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Qualquer preço</SelectItem>
+                <SelectItem value="50">Até R$ 50</SelectItem>
+                <SelectItem value="100">Até R$ 100</SelectItem>
+                <SelectItem value="200">Até R$ 200</SelectItem>
+                <SelectItem value="300">Até R$ 300</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-2 block">Horário disponível</Label>
+            <Select value={timeFilter} onValueChange={setTimeFilter}>
+              <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Qualquer horário</SelectItem>
+                {distinctTimes.map((t) => (
+                  <SelectItem key={t} value={t}>A partir de {t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
 
       {userLoc && filtered.length === 0 && (
         <div className="bg-amber-50 border border-amber-200 text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-200 rounded-xl p-4 text-sm">

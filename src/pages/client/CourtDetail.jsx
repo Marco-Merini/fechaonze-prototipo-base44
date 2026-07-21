@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { formatLongDateWithWeekday } from "@/lib/dateFormat";
 
 const WEEKDAY_BY_JS = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
 const WEEKDAY_LABEL = {
@@ -139,11 +140,7 @@ export default function CourtDetail() {
   const daySlots = slots.filter((s) => s.weekday === targetWeekday);
   const availableSlots = daySlots.filter((s) => !bookedTimes.includes(s.start_time));
 
-  const formattedDate = new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const formattedDate = formatLongDateWithWeekday(selectedDate);
 
   return (
     <div className="space-y-6">
@@ -192,7 +189,7 @@ export default function CourtDetail() {
             onChange={(e) => setSelectedDate(e.target.value)}
             className="rounded-xl max-w-xs"
           />
-          <p className="text-sm text-muted-foreground mt-2 capitalize">{formattedDate} • {WEEKDAY_LABEL[targetWeekday]}</p>
+          <p className="text-sm text-muted-foreground mt-2 capitalize">{formattedDate}</p>
         </div>
 
         {daySlots.length === 0 ? (

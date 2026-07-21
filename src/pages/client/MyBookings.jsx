@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { CalendarCheck, MapPin } from "lucide-react";
+import { formatLongDate } from "@/lib/dateFormat";
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -46,7 +47,7 @@ export default function MyBookings() {
                 <div>
                   <h3 className="font-heading font-semibold text-lg">{b.court_name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    📅 {b.date} &nbsp;•&nbsp; 🕐 {b.start_time} — {b.end_time}
+                    📅 {formatLongDate(b.date)} &nbsp;•&nbsp; 🕐 {b.start_time} — {b.end_time}
                   </p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${

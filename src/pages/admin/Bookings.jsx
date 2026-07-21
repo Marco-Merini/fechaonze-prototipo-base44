@@ -4,6 +4,7 @@ import { CalendarCheck, MessageCircle, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatLongDate } from "@/lib/dateFormat";
 
 export default function Bookings() {
   const [bookings, setBookings] = useState([]);
@@ -41,7 +42,7 @@ export default function Bookings() {
   const openWhatsApp = (booking) => {
     const phone = booking.client_phone.replace(/\D/g, "");
     const msg = encodeURIComponent(
-      `Olá ${booking.client_name}! Sobre seu agendamento na quadra ${booking.court_name} no dia ${booking.date} das ${booking.start_time} às ${booking.end_time}. Gostaria de confirmar sua reserva!`
+      `Olá ${booking.client_name}! Sobre seu agendamento na quadra ${booking.court_name} no dia ${formatLongDate(booking.date)} das ${booking.start_time} às ${booking.end_time}. Gostaria de confirmar sua reserva!`
     );
     window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
   };
@@ -97,7 +98,7 @@ export default function Bookings() {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    📍 {b.court_name} &nbsp;•&nbsp; 📅 {b.date} &nbsp;•&nbsp; 🕐 {b.start_time} — {b.end_time}
+                    📍 {b.court_name} &nbsp;•&nbsp; 📅 {formatLongDate(b.date)} &nbsp;•&nbsp; 🕐 {b.start_time} — {b.end_time}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">📱 {b.client_phone}{b.client_email ? ` • ✉️ ${b.client_email}` : ""}</p>
                 </div>
