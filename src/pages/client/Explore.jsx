@@ -33,29 +33,28 @@ export default function Explore() {
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const [data, establishments, availSlots, legacySlots] = await Promise.all([
-          base44.entities.Court.filter({ is_active: true }),
-          base44.entities.Establishment.filter({ status: "active" }, "-created_date", 200),
-          base44.entities.CourtAvailability.filter({ status: "available" }, "start_time", 500),
-          base44.entities.TimeSlot.filter({ is_available: true }),
-        ]);
-        const estMap = {};
-        establishments.forEach((e) => { estMap[e.id] = e; });
-        const enriched = data.map((c) => {
-          const est = estMap[c.establishment_id];
-          return {
-            ...c,
-            city: c.city || est?.city || "",
-            address: c.address || [est?.address, est?.number, est?.neighborhood].filter(Boolean).join(", ") || "",
-            establishment_name: est?.name || "",
-            latitude: c.latitude ?? est?.latitude ?? null,
-            longitude: c.longitude ?? est?.longitude ?? null,
-          };
-        });
-        setCourts(enriched);
-        setSlots([...availSlots, ...legacySlots]);
-      } catch (e) { console.error(e); }
+      const safe = (p) => p.catch((e) => { console.error(e); return []; });
+      const [data, establishments, availSlots, legacySlots] = await Promise.all([
+        safe(base44.entities.Court.filter({ is_active: true })),
+        safe(base44.entities.Establishment.filter({ status: "active" }, "-created_date", 200)),
+        safe(base44.entities.CourtAvailability.filter({ status: "available" }, "start_time", 500)),
+        safe(base44.entities.TimeSlot.filter({ is_available: true })),
+      ]);
+      const estMap = {};
+      establishments.forEach((e) => { estMap[e.id] = e; });
+      const enriched = data.map((c) => {
+        const est = estMap[c.establishment_id];
+        return {
+          ...c,
+          city: c.city || est?.city || "",
+          address: c.address || [est?.address, est?.number, est?.neighborhood].filter(Boolean).join(", ") || "",
+          establishment_name: est?.name || "",
+          latitude: c.latitude ?? est?.latitude ?? null,
+          longitude: c.longitude ?? est?.longitude ?? null,
+        };
+      });
+      setCourts(enriched);
+      setSlots([...availSlots, ...legacySlots]);
       setLoading(false);
     };
     load();

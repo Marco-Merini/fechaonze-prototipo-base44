@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, ArrowLeft, CalendarCheck, Calendar } from "lucide-react";
+import { MapPin, Clock, ArrowLeft, CalendarCheck, Calendar, Building2, Users, Ruler, Umbrella, CheckCircle2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,7 @@ export default function CourtDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [court, setCourt] = useState(null);
+  const [establishment, setEstablishment] = useState(null);
   const [slots, setSlots] = useState([]);
   const [bookedTimes, setBookedTimes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,14 +44,25 @@ export default function CourtDetail() {
 
   useEffect(() => {
     const load = async () => {
+      const safe = (p) => p.catch((e) => { console.error(e); return []; });
       try {
-        const [c, s] = await Promise.all([
-          base44.entities.Court.get(id),
-          base44.entities.TimeSlot.filter({ court_id: id, is_available: true }),
-        ]);
+        const c = await base44.entities.Court.get(id);
         setCourt(c);
+        const promises = [
+          safe(base44.entities.TimeSlot.filter({ court_id: id, is_available: true })),
+          safe(base44.entities.CourtAvailability.filter({ court_id: id, status: "available" })),
+        ];
+        if (c.establishment_id) {
+          promises.push(
+            base44.entities.Establishment.get(c.establishment_id)
+              .then((e) => setEstablishment(e))
+              .catch((e) => console.error(e))
+          );
+        }
+        const [legacy, avail] = await Promise.all(promises);
+        const all = [...legacy, ...avail];
         setSlots(
-          s.sort(
+          all.sort(
             (a, b) =>
               (WEEKDAY_ORDER[a.weekday] ?? 99) - (WEEKDAY_ORDER[b.weekday] ?? 99) ||
               a.start_time.localeCompare(b.start_time)
@@ -163,13 +175,70 @@ export default function CourtDetail() {
         </div>
         <div className="p-6 sm:p-8">
           <h1 className="text-2xl sm:text-3xl font-heading font-bold">{court.name}</h1>
+          {establishment && (
+            <p className="text-primary font-medium mt-1 flex items-center gap-1.5">
+              <Building2 className="w-4 h-4" /> {establishment.name}
+            </p>
+          )}
           <p className="text-muted-foreground mt-2 flex items-center gap-1.5">
-            <MapPin className="w-4 h-4" /> {court.address}, {court.city}
+            <MapPin className="w-4 h-4" /> {court.address || [establishment?.address, establishment?.number, establishment?.neighborhood].filter(Boolean).join(", ")}, {court.city || establishment?.city}
+            {establishment?.state && `, ${establishment.state}`}
           </p>
           {court.description && <p className="text-muted-foreground mt-3">{court.description}</p>}
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <Tag className="w-3 h-3" /> {court.modality === "futebol_society" ? "Futebol Society" : court.modality === "futsal" ? "Futsal" : court.modality === "futebol_campo" ? "Futebol Campo" : court.modality === "basquete" ? "Basquete" : court.modality === "volei" ? "Vôlei" : court.modality === "beach_tennis" ? "Beach Tennis" : court.modality === "tenis" ? "Tênis" : "Outras"}
+            </span>
+            {court.floor_type && (
+              <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">Piso: {court.floor_type}</span>
+            )}
+            {court.covered && (
+              <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                <Umbrella className="w-3 h-3" /> Coberta
+              </span>
+            )}
+            {court.capacity && (
+              <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                <Users className="w-3 h-3" /> {court.capacity} jogadores
+              </span>
+            )}
+            {court.default_duration && (
+              <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {court.default_duration} min
+              </span>
+            )}
+          </div>
+
+          {court.amenities?.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Comodidades</p>
+              <div className="flex flex-wrap gap-2">
+                {court.amenities.map((a, i) => (
+                  <span key={i} className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-primary" /> {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <p className="text-primary font-bold text-2xl mt-4">
             R$ {court.price_per_hour?.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/hora</span>
           </p>
+
+          {establishment && (
+            <div className="mt-5 bg-muted/50 rounded-xl p-4 space-y-1.5">
+              <p className="text-sm font-semibold flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-primary" /> {establishment.name}
+              </p>
+              {establishment.description && <p className="text-sm text-muted-foreground">{establishment.description}</p>}
+              {establishment.phone && <p className="text-sm text-muted-foreground">Telefone: {establishment.phone}</p>}
+              {establishment.opening_time && establishment.closing_time && (
+                <p className="text-sm text-muted-foreground">Funcionamento: {establishment.opening_time} às {establishment.closing_time}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -230,6 +299,7 @@ export default function CourtDetail() {
           {selectedSlot && (
             <div className="bg-muted/50 rounded-xl p-4 mb-2">
               <p className="font-medium">{court.name}</p>
+              {establishment && <p className="text-xs text-primary">{establishment.name}</p>}
               <p className="text-sm text-muted-foreground capitalize">{formattedDate} • {selectedSlot.start_time} — {selectedSlot.end_time}</p>
               <p className="text-primary font-bold mt-1">R$ {court.price_per_hour?.toFixed(2)}</p>
             </div>
