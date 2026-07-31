@@ -33,6 +33,8 @@ export default function CourtDetail() {
   const { toast } = useToast();
   const [court, setCourt] = useState(null);
   const [establishment, setEstablishment] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [activePhoto, setActivePhoto] = useState(0);
   const [slots, setSlots] = useState([]);
   const [bookedTimes, setBookedTimes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,23 +53,36 @@ export default function CourtDetail() {
         const promises = [
           safe(base44.entities.TimeSlot.filter({ court_id: id, is_available: true })),
           safe(base44.entities.CourtAvailability.filter({ court_id: id, status: "available" })),
+          safe(base44.entities.CourtPhoto.filter({ court_id: id }, "order", 50)),
         ];
         if (c.establishment_id) {
           promises.push(
             base44.entities.Establishment.get(c.establishment_id)
-              .then((e) => setEstablishment(e))
-              .catch((e) => console.error(e))
+              .then(async (e) => {
+                setEstablishment(e);
+                const estPhotos = await safe(base44.entities.EstablishmentPhoto.filter({ establishment_id: e.id }, "order", 50));
+                return estPhotos;
+              })
+              .catch((e) => { console.error(e); return []; })
           );
         }
-        const [legacy, avail] = await Promise.all(promises);
-        const all = [...legacy, ...avail];
+        const [legacy, avail, courtPhotos, estPhotos] = await Promise.all(promises);
+        const allSlots = [...legacy, ...avail];
         setSlots(
-          all.sort(
+          allSlots.sort(
             (a, b) =>
               (WEEKDAY_ORDER[a.weekday] ?? 99) - (WEEKDAY_ORDER[b.weekday] ?? 99) ||
               a.start_time.localeCompare(b.start_time)
           )
         );
+        const gallery = [
+          ...(c.photo_url ? [{ photo_url: c.photo_url }] : []),
+          ...courtPhotos.map((p) => ({ photo_url: p.photo_url })),
+          ...(estPhotos || []).map((p) => ({ photo_url: p.photo_url })),
+        ];
+        const unique = gallery.filter((p, i, arr) => p.photo_url && arr.findIndex((x) => x.photo_url === p.photo_url) === i);
+        setPhotos(unique);
+        setActivePhoto(0);
       } catch (e) { console.error(e); }
       setLoading(false);
     };
@@ -162,8 +177,10 @@ export default function CourtDetail() {
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <div className="h-48 sm:h-64 bg-gradient-to-br from-primary/10 to-primary/5 relative">
-          {court.photo_url ? (
-            <img src={court.photo_url} alt={court.name} className="w-full h-full object-cover" />
+          {photos.length > 0 ? (
+            <img src={photos[activePhoto]?.photo_url} alt={court.name} className="w-full h-full object-cover" />
+          ) : establishment?.main_photo ? (
+            <img src={establishment.main_photo} alt={court.name} className="w-full h-full object-cover" />
           ) : (
             <div className="flex items-center justify-center h-full">
               <MapPin className="w-20 h-20 text-primary/15" />
@@ -173,6 +190,15 @@ export default function CourtDetail() {
             {court.sport_type}
           </span>
         </div>
+        {photos.length > 1 && (
+          <div className="flex gap-2 p-3 overflow-x-auto">
+            {photos.map((p, i) => (
+              <button key={i} onClick={() => setActivePhoto(i)} className={`shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 ${i === activePhoto ? "border-primary" : "border-transparent"}`}>
+                <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
         <div className="p-6 sm:p-8">
           <h1 className="text-2xl sm:text-3xl font-heading font-bold">{court.name}</h1>
           {establishment && (

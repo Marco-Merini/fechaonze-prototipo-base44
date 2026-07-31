@@ -49,6 +49,7 @@ export default function Explore() {
           city: c.city || est?.city || "",
           address: c.address || [est?.address, est?.number, est?.neighborhood].filter(Boolean).join(", ") || "",
           establishment_name: est?.name || "",
+          photo_url: c.photo_url || est?.main_photo || "",
           latitude: c.latitude ?? est?.latitude ?? null,
           longitude: c.longitude ?? est?.longitude ?? null,
         };
