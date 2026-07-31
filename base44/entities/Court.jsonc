@@ -2,14 +2,67 @@
   "name": "Court",
   "type": "object",
   "properties": {
+    "establishment_id": {
+      "type": "string",
+      "description": "ID do estabelecimento vinculado"
+    },
     "name": {
       "type": "string",
       "description": "Nome da quadra"
     },
+    "description": {
+      "type": "string",
+      "description": "Descricao da quadra"
+    },
     "sport_type": {
       "type": "string",
       "default": "Futebol Society",
-      "description": "Tipo de esporte (futebol)"
+      "description": "Tipo de esporte (legado)"
+    },
+    "modality": {
+      "type": "string",
+      "enum": [
+        "futebol_society",
+        "futsal",
+        "futebol_campo",
+        "basquete",
+        "volei",
+        "beach_tennis",
+        "tenis",
+        "outras"
+      ],
+      "default": "futsal",
+      "description": "Modalidade esportiva"
+    },
+    "floor_type": {
+      "type": "string",
+      "description": "Tipo de piso"
+    },
+    "covered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Coberta ou descoberta"
+    },
+    "capacity": {
+      "type": "number",
+      "description": "Capacidade de jogadores"
+    },
+    "price_per_hour": {
+      "type": "number",
+      "description": "Valor por horario (R$)"
+    },
+    "default_duration": {
+      "type": "number",
+      "default": 60,
+      "description": "Duracao padrao da reserva (minutos)"
+    },
+    "amenities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Comodidades"
     },
     "city": {
       "type": "string",
@@ -17,43 +70,32 @@
     },
     "address": {
       "type": "string",
-      "description": "Endere\u00e7o completo"
-    },
-    "price_per_hour": {
-      "type": "number",
-      "description": "Pre\u00e7o por hora (R$)"
+      "description": "Endereco"
     },
     "photo_url": {
       "type": "string",
-      "description": "URL da foto da quadra"
+      "description": "URL da foto principal"
     },
     "whatsapp_number": {
       "type": "string",
-      "description": "WhatsApp do dono da quadra"
-    },
-    "description": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o adicional"
+      "description": "WhatsApp do responsavel"
     },
     "latitude": {
       "type": "number",
-      "description": "Latitude da quadra"
+      "description": "Latitude"
     },
     "longitude": {
       "type": "number",
-      "description": "Longitude da quadra"
+      "description": "Longitude"
     },
     "is_active": {
       "type": "boolean",
       "default": true,
-      "description": "Se a quadra est\u00e1 ativa"
+      "description": "Se a quadra esta ativa"
     }
   },
   "required": [
     "name",
-    "city",
-    "address",
-    "price_per_hour",
-    "whatsapp_number"
+    "price_per_hour"
   ]
 }

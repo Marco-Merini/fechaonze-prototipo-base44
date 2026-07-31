@@ -1,0 +1,28 @@
+{
+  "name": "EstablishmentPhoto",
+  "type": "object",
+  "properties": {
+    "establishment_id": {
+      "type": "string",
+      "description": "ID do estabelecimento"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL da foto"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Ordem de exibicao"
+    },
+    "is_main": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se e a foto principal"
+    }
+  },
+  "required": [
+    "establishment_id",
+    "photo_url"
+  ]
+}

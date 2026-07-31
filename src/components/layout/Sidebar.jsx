@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, Settings, LogOut, Menu, X, Users, Star, UserPlus } from "lucide-react";
+import { LayoutDashboard, MapPin, Clock, CalendarCheck, Search, Settings, LogOut, Menu, X, Users, Star, UserPlus, Building2 } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 // ThemeToggle movido para a página de Configurações
@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 
 const adminLinks = [
   { label: "Painel", path: "/", icon: LayoutDashboard },
+  { label: "Estabelecimentos", path: "/establishments", icon: Building2 },
   { label: "Minhas Quadras", path: "/courts", icon: MapPin },
   { label: "Horários", path: "/time-slots", icon: Clock },
   { label: "Agendamentos", path: "/bookings", icon: CalendarCheck },

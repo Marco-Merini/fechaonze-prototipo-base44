@@ -16,6 +16,9 @@ import Dashboard from '@/pages/admin/Dashboard';
 import Courts from '@/pages/admin/Courts';
 import TimeSlots from '@/pages/admin/TimeSlots';
 import Bookings from '@/pages/admin/Bookings';
+import Establishments from '@/pages/admin/Establishments';
+import EstablishmentForm from '@/pages/admin/EstablishmentForm';
+import EstablishmentDetail from '@/pages/admin/EstablishmentDetail';
 import Explore from '@/pages/client/Explore';
 import CourtDetail from '@/pages/client/CourtDetail';
 import MyBookings from '@/pages/client/MyBookings';
@@ -69,6 +72,10 @@ const RoleRouter = () => {
       <Routes>
         <Route element={<AppLayout userRole="dono" />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/establishments" element={<Establishments />} />
+          <Route path="/establishments/new" element={<EstablishmentForm />} />
+          <Route path="/establishments/:id" element={<EstablishmentDetail />} />
+          <Route path="/establishments/:id/edit" element={<EstablishmentForm />} />
           <Route path="/courts" element={<Courts />} />
           <Route path="/time-slots" element={<TimeSlots />} />
           <Route path="/bookings" element={<Bookings />} />

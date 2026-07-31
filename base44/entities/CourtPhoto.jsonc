@@ -1,0 +1,28 @@
+{
+  "name": "CourtPhoto",
+  "type": "object",
+  "properties": {
+    "court_id": {
+      "type": "string",
+      "description": "ID da quadra"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL da foto"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "description": "Ordem de exibicao"
+    },
+    "is_main": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se e a foto principal"
+    }
+  },
+  "required": [
+    "court_id",
+    "photo_url"
+  ]
+}

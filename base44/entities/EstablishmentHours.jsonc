@@ -1,0 +1,40 @@
+{
+  "name": "EstablishmentHours",
+  "type": "object",
+  "properties": {
+    "establishment_id": {
+      "type": "string",
+      "description": "ID do estabelecimento"
+    },
+    "weekday": {
+      "type": "string",
+      "enum": [
+        "domingo",
+        "segunda",
+        "terca",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sabado"
+      ],
+      "description": "Dia da semana"
+    },
+    "opening_time": {
+      "type": "string",
+      "description": "Horario de abertura (HH:mm)"
+    },
+    "closing_time": {
+      "type": "string",
+      "description": "Horario de fechamento (HH:mm)"
+    },
+    "closed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o dia esta fechado"
+    }
+  },
+  "required": [
+    "establishment_id",
+    "weekday"
+  ]
+}

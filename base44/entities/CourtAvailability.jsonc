@@ -1,0 +1,55 @@
+{
+  "name": "CourtAvailability",
+  "type": "object",
+  "properties": {
+    "court_id": {
+      "type": "string",
+      "description": "ID da quadra"
+    },
+    "weekday": {
+      "type": "string",
+      "enum": [
+        "domingo",
+        "segunda",
+        "terca",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sabado"
+      ],
+      "description": "Dia da semana (recorrente)"
+    },
+    "specific_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data especifica (opcional)"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Horario inicial (HH:mm)"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Horario final (HH:mm)"
+    },
+    "price": {
+      "type": "number",
+      "description": "Valor do horario (R$)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "reserved",
+        "blocked"
+      ],
+      "default": "available",
+      "description": "Status do horario"
+    }
+  },
+  "required": [
+    "court_id",
+    "start_time",
+    "end_time"
+  ]
+}

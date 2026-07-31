@@ -1,0 +1,107 @@
+{
+  "name": "Establishment",
+  "type": "object",
+  "properties": {
+    "owner_id": {
+      "type": "string",
+      "description": "ID do gestor responsavel"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome do estabelecimento"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descricao"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefone"
+    },
+    "email": {
+      "type": "string",
+      "description": "E-mail"
+    },
+    "cep": {
+      "type": "string",
+      "description": "CEP"
+    },
+    "address": {
+      "type": "string",
+      "description": "Endereco"
+    },
+    "number": {
+      "type": "string",
+      "description": "Numero"
+    },
+    "complement": {
+      "type": "string",
+      "description": "Complemento"
+    },
+    "neighborhood": {
+      "type": "string",
+      "description": "Bairro"
+    },
+    "city": {
+      "type": "string",
+      "description": "Cidade"
+    },
+    "state": {
+      "type": "string",
+      "description": "Estado (UF)"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude"
+    },
+    "main_photo": {
+      "type": "string",
+      "description": "URL da foto principal"
+    },
+    "opening_time": {
+      "type": "string",
+      "description": "Horario de abertura (HH:mm)"
+    },
+    "closing_time": {
+      "type": "string",
+      "description": "Horario de fechamento (HH:mm)"
+    },
+    "operating_days": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "domingo",
+          "segunda",
+          "terca",
+          "quarta",
+          "quinta",
+          "sexta",
+          "sabado"
+        ]
+      },
+      "default": [],
+      "description": "Dias de funcionamento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "description": "Status ativo ou inativo"
+    }
+  },
+  "required": [
+    "owner_id",
+    "name",
+    "address",
+    "city",
+    "state"
+  ]
+}
