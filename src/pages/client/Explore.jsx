@@ -34,12 +34,27 @@ export default function Explore() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [data, allSlots] = await Promise.all([
+        const [data, establishments, availSlots, legacySlots] = await Promise.all([
           base44.entities.Court.filter({ is_active: true }),
+          base44.entities.Establishment.filter({ status: "active" }, "-created_date", 200),
+          base44.entities.CourtAvailability.filter({ status: "available" }, "start_time", 500),
           base44.entities.TimeSlot.filter({ is_available: true }),
         ]);
-        setCourts(data);
-        setSlots(allSlots);
+        const estMap = {};
+        establishments.forEach((e) => { estMap[e.id] = e; });
+        const enriched = data.map((c) => {
+          const est = estMap[c.establishment_id];
+          return {
+            ...c,
+            city: c.city || est?.city || "",
+            address: c.address || [est?.address, est?.number, est?.neighborhood].filter(Boolean).join(", ") || "",
+            establishment_name: est?.name || "",
+            latitude: c.latitude ?? est?.latitude ?? null,
+            longitude: c.longitude ?? est?.longitude ?? null,
+          };
+        });
+        setCourts(enriched);
+        setSlots([...availSlots, ...legacySlots]);
       } catch (e) { console.error(e); }
       setLoading(false);
     };
@@ -216,10 +231,13 @@ export default function Explore() {
               </div>
               <div className="p-5">
                 <h3 className="font-heading font-semibold text-lg group-hover:text-primary transition-colors">{court.name}</h3>
+                {court.establishment_name && (
+                  <p className="text-xs text-primary font-medium mt-0.5">{court.establishment_name}</p>
+                )}
                 <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" /> {court.city}
+                  <MapPin className="w-3.5 h-3.5" /> {court.city || "Cidade não informada"}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">{court.address}</p>
+                {court.address && <p className="text-xs text-muted-foreground mt-0.5">{court.address}</p>}
                 {court.description && <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{court.description}</p>}
                 <div className="flex items-center justify-between mt-4">
                   <p className="text-primary font-bold text-lg">
