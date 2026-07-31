@@ -16,7 +16,7 @@ const emptyForm = {
   capacity: "", price_per_hour: "", default_duration: 60, amenities: [], photo_url: "", is_active: true,
 };
 
-export default function CourtFormDialog({ open, onOpenChange, establishmentId, court, onSaved }) {
+export default function CourtFormDialog({ open, onOpenChange, establishmentId, court, onSaved, onCreated }) {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -78,12 +78,15 @@ export default function CourtFormDialog({ open, onOpenChange, establishmentId, c
       if (editingId) {
         await base44.entities.Court.update(editingId, payload);
         toast({ title: "Quadra atualizada!" });
+        onOpenChange(false);
+        onSaved();
       } else {
-        await base44.entities.Court.create(payload);
-        toast({ title: "Quadra criada!" });
+        const created = await base44.entities.Court.create(payload);
+        toast({ title: "Quadra criada! Agora cadastre os horários." });
+        onOpenChange(false);
+        onSaved();
+        if (onCreated) onCreated(created);
       }
-      onOpenChange(false);
-      onSaved();
     } catch (err) {
       toast({ title: "Erro ao salvar quadra", description: err.message, variant: "destructive" });
     }

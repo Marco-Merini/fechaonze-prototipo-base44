@@ -7,6 +7,7 @@ import { Image } from "@/components/ui/image";
 import { WEEKDAYS, weekdayLabel } from "@/lib/establishments";
 import CourtCard from "@/components/establishments/CourtCard";
 import CourtFormDialog from "@/components/establishments/CourtFormDialog";
+import CourtScheduleDialog from "@/components/establishments/CourtScheduleDialog";
 import { ArrowLeft, Pencil, Plus, MapPin, Phone, Clock, Building2, LayoutGrid, Power } from "lucide-react";
 
 export default function EstablishmentDetail() {
@@ -20,6 +21,8 @@ export default function EstablishmentDetail() {
   const [activePhoto, setActivePhoto] = useState(0);
   const [courtDialogOpen, setCourtDialogOpen] = useState(false);
   const [editingCourt, setEditingCourt] = useState(null);
+  const [scheduleCourt, setScheduleCourt] = useState(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -186,7 +189,7 @@ export default function EstablishmentDetail() {
                 key={court.id}
                 court={court}
                 onEdit={(c) => { setEditingCourt(c); setCourtDialogOpen(true); }}
-                onManageSchedule={(c) => toast({ title: "Gestão de horários em breve", description: `Quadra: ${c.name}` })}
+                onManageSchedule={(c) => { setScheduleCourt(c); setScheduleOpen(true); }}
               />
             ))}
           </div>
@@ -199,6 +202,13 @@ export default function EstablishmentDetail() {
         establishmentId={id}
         court={editingCourt}
         onSaved={load}
+        onCreated={(c) => { setScheduleCourt(c); setScheduleOpen(true); }}
+      />
+      <CourtScheduleDialog
+        open={scheduleOpen}
+        onOpenChange={setScheduleOpen}
+        court={scheduleCourt}
+        establishment={est}
       />
     </div>
   );

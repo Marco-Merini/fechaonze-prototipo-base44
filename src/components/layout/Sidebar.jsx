@@ -9,8 +9,6 @@ import Logo from "@/components/Logo";
 const adminLinks = [
   { label: "Painel", path: "/", icon: LayoutDashboard },
   { label: "Estabelecimentos", path: "/establishments", icon: Building2 },
-  { label: "Minhas Quadras", path: "/courts", icon: MapPin },
-  { label: "Horários", path: "/time-slots", icon: Clock },
   { label: "Agendamentos", path: "/bookings", icon: CalendarCheck },
 ];
 
